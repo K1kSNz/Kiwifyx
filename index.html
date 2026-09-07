@@ -1,201 +1,199 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiwifyx / Control Panel</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
-    body { background-color: #0c0c0c; color: #e0e0e0; padding: 12px; display: flex; flex-direction: column; gap: 16px; }
-    
-    .header { font-size: 16px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 6px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiwifyx Control Panel</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #181818;
+            --hover-bg: #282828;
+            --input-bg: #0f0f0f;
+            --border-color: #2a2a2a;
+            --text-main: #e1e1e1;
+            --text-sub: #888888;
+            --btn-grey: #242424;
+            --btn-grey-hover: #333333;
+            --accent-green: #1db954;
+            --accent-blue: #0088cc;
+        }
 
-    /* Общий стиль секций */
-    .section-card {
-      background: #121212;
-      border: 1px solid #222;
-      border-radius: 6px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Consolas, monospace; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        
+        .header { width: 100%; max-width: 500px; font-size: 14px; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .back-btn { display: none; width: 100%; max-width: 500px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px; font-size: 12px; cursor: pointer; margin-bottom: 10px; text-align: left; }
+        
+        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 8px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; cursor: pointer; border-radius: 4px; }
+        .card-title { font-size: 13px; font-weight: bold; }
+        .card-content { display: none; margin-top: 10px; }
+        
+        input { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 10px; color: var(--text-main); font-size: 12px; outline: none; border-radius: 4px; }
+        
+        .btn-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .btn-action { width: 100%; border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; text-align: center; }
+        
+        .btn-grey-quality { background: var(--btn-grey); border: 1px solid #333; }
+        .btn-grey-quality:hover { background: var(--btn-grey-hover); border-color: #555; }
 
-    .section-title {
-      font-size: 13px;
-      font-weight: bold;
-      color: #888;
-      text-transform: lowercase;
-    }
+        .btn-music { background: var(--accent-green); border: none; color: white; }
+        .btn-photo { background: var(--accent-blue); border: none; color: white; }
 
-    /* 1. SECTION MENU (Сетка с пустой кнопкой) */
-    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .menu-card { 
-      background: #181818; 
-      border: 1px solid #282828; 
-      height: 90px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      font-weight: bold; 
-      border-radius: 4px;
-      color: #fff;
-    }
-    .menu-card.empty {
-      background: #101010;
-      border: 1px dashed #222;
-      color: #444;
-      cursor: default;
-    }
-
-    /* 2. SECTION VIDEO DOWNLOAD */
-    .video-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .preview-placeholder {
-      background: #181818;
-      border: 1px solid #282828;
-      border-radius: 4px;
-      height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #555;
-      font-size: 11px;
-    }
-    .video-controls { display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
-
-    /* Поля ввода и Кнопки */
-    input[type="text"], select { 
-      width: 100%; 
-      padding: 10px; 
-      background: #080808; 
-      border: 1px solid #2c2c2c; 
-      color: #fff; 
-      border-radius: 4px; 
-      outline: none; 
-      font-size: 12px;
-    }
-    .btn-submit { 
-      width: 100%; 
-      padding: 10px; 
-      background: #e0e0e0; 
-      color: #000; 
-      border: none; 
-      cursor: pointer; 
-      font-weight: bold; 
-      border-radius: 4px; 
-    }
-    .btn-submit:active { background: #bbb; }
-
-    /* 3. SECTION MUSIC DOWNLOAD */
-    .results-list { display: flex; flex-direction: column; gap: 6px; }
-    .track-item { display: flex; align-items: center; background: #161616; border: 1px solid #222; padding: 6px; border-radius: 4px; cursor: pointer; }
-    .track-item:hover { border-color: #444; background: #1c1c1c; }
-    .track-cover { width: 42px; height: 42px; border-radius: 3px; background: #222; margin-right: 10px; object-fit: cover; }
-    .track-info { display: flex; flex-direction: column; }
-    .track-title { font-size: 13px; font-weight: bold; color: #fff; }
-    .track-artist { font-size: 11px; color: #777; margin-top: 2px; }
-  </style>
+        .results-list { margin-top: 10px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .track-item { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; cursor: pointer; gap: 10px; border-radius: 4px; }
+        .track-item:hover { background: var(--hover-bg); }
+        .music-cover { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; background: #222; }
+        .track-info { display: flex; flex-direction: column; overflow: hidden; }
+        .track-title { font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+    </style>
 </head>
 <body>
 
-  <div class="header">Kiwifyx / Control Panel</div>
+    <div class="header">Kiwifyx / Control Panel</div>
+    <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
-  <!-- 1. SECTION MENU -->
-  <div class="section-card">
-    <div class="section-title">menu</div>
-    <div class="menu-grid">
-      <div class="menu-card" onclick="scrollToSection('video-section')">VIDEO & MUSIC</div>
-      <!-- Пустая кнопка на будущее -->
-      <div class="menu-card empty">+ FUTURE</div>
+    <div class="container">
+        <!-- MUSIC SEARCH -->
+        <div class="card" id="card-music" onclick="openCard('music')">
+            <div class="card-title">🎵 Music Search</div>
+            <div class="card-content" id="content-music">
+                <input type="text" id="input-music" placeholder="Ссылка Spotify или название песни..." oninput="handleMusicInput()" onclick="event.stopPropagation()">
+                <div class="results-list" id="results-music"></div>
+            </div>
+        </div>
+
+        <!-- PHOTO SEARCH -->
+        <div class="card" id="card-photo" onclick="openCard('photo')">
+            <div class="card-title">🖼 Photo Search</div>
+            <div class="card-content" id="content-photo">
+                <input type="text" id="input-photo" placeholder="Название картинки..." oninput="handleDirectText('photo')" onclick="event.stopPropagation()">
+                <div class="results-list" id="results-photo"></div>
+            </div>
+        </div>
+
+        <!-- VIDEO DOWNLOADER -->
+        <div class="card" id="card-video" onclick="openCard('video')">
+            <div class="card-title">🎥 Video Downloader</div>
+            <div class="card-content" id="content-video">
+                <input type="text" id="input-video" placeholder="Вставьте ссылку на видео..." oninput="handleVideoInput()" onclick="event.stopPropagation()">
+                
+                <div id="video-actions" style="display: none;">
+                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 10px; margin-bottom: 2px;">Выберите формат и качество:</div>
+                    <div class="btn-list">
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('1080p')">🎬 Скачать 1080p (Full HD)</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('720p')">🎬 Скачать 720p (HD)</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('480p')">🎬 Скачать 480p</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('360p')">🎬 Скачать 360p</button>
+                        <button class="btn-action btn-grey-quality" style="border-color: #444;" onclick="sendVideoQuery('audio')">🎵 Скачать только Audio (MP3)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- 2. SECTION VIDEO DOWNLOAD -->
-  <div id="video-section" class="section-card">
-    <div class="section-title">video download</div>
-    <input type="text" id="video-url" placeholder="Ссылка на YouTube...">
-    
-    <div class="video-layout">
-      <div class="preview-placeholder">PREVIEW</div>
-      <div class="video-controls">
-        <select id="video-quality">
-          <option value="1080p">1080p Quality</option>
-          <option value="720p">720p Quality</option>
-          <option value="480p">480p Quality</option>
-          <option value="audio">Только звук (MP3)</option>
-        </select>
-        <button class="btn-submit" onclick="sendVideoRequest()">Скачать</button>
-      </div>
-    </div>
-  </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
 
-  <!-- 3. SECTION MUSIC DOWNLOAD -->
-  <div class="section-card">
-    <div class="section-title">music download</div>
-    <input type="text" id="music-search" placeholder="Поиск песни или ссылка..." oninput="searchMusic(this.value)">
-    
-    <div class="results-list" id="music-results">
-      <div class="track-item" onclick="sendMusicRequest('Throw Away Your Mask - Lyn')">
-        <div class="track-cover" style="background-color:#2a2a2a;"></div>
-        <div class="track-info">
-          <div class="track-title">Throw Away Your Mask</div>
-          <div class="track-artist">Lyn</div>
-        </div>
-      </div>
-      <div class="track-item" onclick="sendMusicRequest('Linear - Chinese Cigarettes')">
-        <div class="track-cover" style="background-color:#2a2a2a;"></div>
-        <div class="track-info">
-          <div class="track-title">Linear</div>
-          <div class="track-artist">Chinese Cigarettes</div>
-        </div>
-      </div>
-    </div>
-  </div>
+        let activeType = null;
+        let searchTimeout = null;
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+        function openCard(type) {
+            if (activeType) return;
+            activeType = type;
+            ['music', 'photo', 'video'].forEach(t => {
+                if (t !== type) document.getElementById(`card-${t}`).style.display = 'none';
+            });
+            document.getElementById(`content-${type}`).style.display = 'block';
+            document.getElementById('backBtn').style.display = 'block';
+        }
 
-    function scrollToSection(id) {
-      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    }
+        function resetMenu() {
+            ['music', 'photo', 'video'].forEach(t => {
+                document.getElementById(`card-${t}`).style.display = 'block';
+                document.getElementById(`content-${t}`).style.display = 'none';
+                const input = document.getElementById(`input-${t}`);
+                if (input) input.value = '';
+                const res = document.getElementById(`results-${t}`);
+                if (res) res.innerHTML = '';
+            });
+            document.getElementById('video-actions').style.display = 'none';
+            document.getElementById('backBtn').style.display = 'none';
+            activeType = null;
+        }
 
-    function sendVideoRequest() {
-      const url = document.getElementById('video-url').value.trim();
-      const quality = document.getElementById('video-quality').value;
-      if (!url) return alert('Вставьте ссылку!');
-      
-      const mode = quality === 'audio' ? 'audio' : 'video';
-      tg.sendData(`${mode}|||${url}|||${quality}`);
-      tg.close();
-    }
+        function sendQuery(cmd, val) {
+            tg.sendData(`${cmd} ${val}`);
+            tg.close();
+        }
 
-    function sendMusicRequest(query) {
-      tg.sendData(`audio|||${query}|||best`);
-      tg.close();
-    }
+        function handleMusicInput() {
+            clearTimeout(searchTimeout);
+            const val = document.getElementById('input-music').value.trim();
+            const resBox = document.getElementById('results-music');
 
-    function searchMusic(val) {
-      if (!val.trim()) return;
-      const container = document.getElementById('music-results');
-      container.innerHTML = `
-        <div class="track-item" onclick="sendMusicRequest('${val}')">
-          <div class="track-cover" style="background-color:#333;"></div>
-          <div class="track-info">
-            <div class="track-title">${val}</div>
-            <div class="track-artist">Искать и скачать оригинал</div>
-          </div>
-        </div>
-        <div class="track-item" onclick="sendMusicRequest('${val} slowed')">
-          <div class="track-cover" style="background-color:#333;"></div>
-          <div class="track-info">
-            <div class="track-title">${val} (Slowed)</div>
-            <div class="track-artist">Похожий вариант</div>
-          </div>
-        </div>
-      `;
-    }
-  </script>
+            if (!val) { resBox.innerHTML = ''; return; }
+
+            if (val.includes('spotify.com') || val.startsWith('http://') || val.startsWith('https://')) {
+                resBox.innerHTML = `<button class="btn-action btn-music" onclick="sendQuery('/music', '${val}')">🎧 Скачать по ссылке</button>`;
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(val)}&entity=song&limit=6`)
+                    .then(res => res.json())
+                    .then(data => {
+                        let html = '';
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(item => {
+                                const songTitle = `${item.artistName} - ${item.trackName}`;
+                                const cleanTitle = songTitle.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                                html += `
+                                    <div class="track-item" onclick="sendQuery('/music', '${cleanTitle}')">
+                                        <img class="music-cover" src="${item.artworkUrl100}">
+                                        <div class="track-info">
+                                            <div class="track-title">${escapeHtml(item.trackName)}</div>
+                                            <div class="track-artist">${escapeHtml(item.artistName)}</div>
+                                        </div>
+                                    </div>`;
+                            });
+                        }
+                        resBox.innerHTML = html;
+                    });
+            }, 300);
+        }
+
+        function handleVideoInput() {
+            const val = document.getElementById('input-video').value.trim();
+            const actions = document.getElementById('video-actions');
+            if (val.length > 5 && (val.startsWith('http://') || val.startsWith('https://'))) {
+                actions.style.display = 'block';
+            } else {
+                actions.style.display = 'none';
+            }
+        }
+
+        function sendVideoQuery(quality) {
+            const url = document.getElementById('input-video').value.trim();
+            if (url) {
+                sendQuery('/video', `${quality} ${url}`);
+            }
+        }
+
+        function handleDirectText(type) {
+            const val = document.getElementById(`input-${type}`).value.trim();
+            const resBox = document.getElementById(`results-${type}`);
+            if (!val) { resBox.innerHTML = ''; return; }
+            const cleanVal = val.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            resBox.innerHTML = `<button class="btn-action btn-photo" onclick="sendQuery('/photo', '${cleanVal}')">🖼 Искать фото: "${escapeHtml(val)}"</button>`;
+        }
+
+        function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+    </script>
 </body>
 </html>
