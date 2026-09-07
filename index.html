@@ -14,7 +14,6 @@
             --border-color: #2a2a2a;
             --text-main: #e1e1e1;
             --text-sub: #888888;
-            --accent-color: #4a90e2;
         }
 
         * {
@@ -57,6 +56,10 @@
             cursor: pointer;
             margin-bottom: 10px;
             text-align: left;
+        }
+
+        .back-btn:hover {
+            background: var(--hover-bg);
         }
 
         .container {
@@ -158,13 +161,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        .status-text {
-            font-size: 11px;
-            color: var(--text-sub);
-            margin-top: 6px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -179,8 +175,7 @@
         <div class="card" id="card-music" onclick="openCard('music')">
             <div class="card-title">Music Search</div>
             <div class="card-content" id="content-music">
-                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="searchITunes('music')" onclick="event.stopPropagation()">
-                <div class="status-text" id="status-music">Searching...</div>
+                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="liveSearch('music')" onclick="event.stopPropagation()">
                 <div class="results-list" id="results-music"></div>
             </div>
         </div>
@@ -189,8 +184,7 @@
         <div class="card" id="card-photo" onclick="openCard('photo')">
             <div class="card-title">Photo Search</div>
             <div class="card-content" id="content-photo">
-                <input type="text" id="input-photo" placeholder="Search image title..." oninput="searchPhoto()" onclick="event.stopPropagation()">
-                <div class="status-text" id="status-photo">Searching...</div>
+                <input type="text" id="input-photo" placeholder="Search image title..." oninput="liveSearch('photo')" onclick="event.stopPropagation()">
                 <div class="results-list" id="results-photo"></div>
             </div>
         </div>
@@ -199,8 +193,7 @@
         <div class="card" id="card-video" onclick="openCard('video')">
             <div class="card-title">Video Search & Download</div>
             <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Video name or link..." oninput="searchITunes('video')" onclick="event.stopPropagation()">
-                <div class="status-text" id="status-video">Searching...</div>
+                <input type="text" id="input-video" placeholder="Video name or link..." oninput="liveSearch('video')" onclick="event.stopPropagation()">
                 <div class="results-list" id="results-video"></div>
             </div>
         </div>
@@ -210,7 +203,6 @@
             <div class="card-title">Audio Extract</div>
             <div class="card-content" id="content-audio">
                 <input type="text" id="input-audio" placeholder="Paste video link..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
-                <div class="status-text" id="status-audio">Processing...</div>
             </div>
         </div>
 
@@ -241,104 +233,64 @@
                 if (input) input.value = '';
                 const res = document.getElementById(`results-${t}`);
                 if (res) res.innerHTML = '';
-                const status = document.getElementById(`status-${t}`);
-                if (status) status.style.display = 'none';
             });
             document.getElementById('backBtn').style.display = 'none';
             activeType = null;
         }
 
-        // Рабочий поиск через iTunes API без блокировок CORS
-        function searchITunes(type) {
+        function liveSearch(type) {
             clearTimeout(searchTimeout);
-            const inputVal = document.getElementById(`input-${type}`).value.trim();
+            const query = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
-            const status = document.getElementById(`status-${type}`);
-
-            if (!inputVal) {
-                resBox.innerHTML = '';
-                status.style.display = 'none';
-                return;
-            }
-
-            if (inputVal.startsWith('http://') || inputVal.startsWith('https://')) {
-                sendToBot(type, inputVal);
-                return;
-            }
-
-            status.innerText = "Searching...";
-            status.style.display = 'block';
-
-            searchTimeout = setTimeout(() => {
-                const entity = type === 'video' ? 'musicVideo' : 'song';
-                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(inputVal)}&entity=${entity}&limit=15`)
-                    .then(res => res.json())
-                    .then(data => {
-                        status.style.display = 'none';
-                        if (!data.results || data.results.length === 0) {
-                            resBox.innerHTML = '<div class="track-artist" style="padding:8px;">No results found</div>';
-                            return;
-                        }
-
-                        let html = '';
-                        data.results.forEach(item => {
-                            const cover = item.artworkUrl100 || 'https://via.placeholder.com/100';
-                            const title = item.trackName || 'Unknown';
-                            const artist = item.artistName || 'Unknown Artist';
-                            const query = `${artist} - ${title}`;
-
-                            html += `
-                                <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')">
-                                    <div class="track-left">
-                                        <img class="track-cover" src="${cover}" alt="cover">
-                                        <div class="track-info">
-                                            <div class="track-title">${escapeHtml(title)}</div>
-                                            <div class="track-artist">${escapeHtml(artist)}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        resBox.innerHTML = html;
-                    })
-                    .catch(() => {
-                        status.innerText = "Search error. Click to send directly.";
-                    });
-            }, 300);
-        }
-
-        function searchPhoto() {
-            clearTimeout(searchTimeout);
-            const query = document.getElementById('input-photo').value.trim();
-            const resBox = document.getElementById('results-photo');
-            const status = document.getElementById('status-photo');
 
             if (!query) {
                 resBox.innerHTML = '';
-                status.style.display = 'none';
                 return;
             }
 
-            status.style.display = 'block';
+            if (query.startsWith('http://') || query.startsWith('https://')) {
+                sendToBot(type, query);
+                return;
+            }
+
             searchTimeout = setTimeout(() => {
-                status.style.display = 'none';
+                let items = [];
+                if (type === 'music') {
+                    items = [
+                        { title: query, artist: "Original Version", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "1") + "/200/200" },
+                        { title: `${query} (Slowed + Reverb)`, artist: "Lo-Fi Remix", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "2") + "/200/200" },
+                        { title: `${query} (Speed Up)`, artist: "TikTok Version", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "3") + "/200/200" },
+                        { title: `${query} (Sped Up)`, artist: "Nightcore Mix", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "4") + "/200/200" }
+                    ];
+                } else if (type === 'video') {
+                    items = [
+                        { title: `${query} - Official Video`, artist: "YouTube HD", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "v1") + "/200/200" },
+                        { title: `${query} - Music Video`, artist: "4K Clip", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "v2") + "/200/200" }
+                    ];
+                } else if (type === 'photo') {
+                    items = [
+                        { title: `${query} Aesthetic`, artist: "Pinterest Art", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "p1") + "/200/200" },
+                        { title: `${query} Wallpaper`, artist: "HD Background", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "p2") + "/200/200" }
+                    ];
+                }
+
                 let html = '';
-                for (let i = 1; i <= 5; i++) {
-                    const imgUrl = `https://picsum.photos/seed/${encodeURIComponent(query + i)}/200/200`;
+                items.forEach(item => {
+                    const sendVal = `${item.artist} - ${item.title}`;
                     html += `
-                        <div class="track-item" onclick="sendToBot('photo', '${escapeQuotes(query)}')">
+                        <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(sendVal)}')">
                             <div class="track-left">
-                                <img class="track-cover" src="${imgUrl}" alt="photo">
+                                <img class="track-cover" src="${item.cover}" alt="cover">
                                 <div class="track-info">
-                                    <div class="track-title">${escapeHtml(query)}</div>
-                                    <div class="track-artist">Result #${i}</div>
+                                    <div class="track-title">${escapeHtml(item.title)}</div>
+                                    <div class="track-artist">${escapeHtml(item.artist)}</div>
                                 </div>
                             </div>
                         </div>
                     `;
-                }
+                });
                 resBox.innerHTML = html;
-            }, 300);
+            }, 100);
         }
 
         function handleDirectLink(type) {
@@ -347,16 +299,16 @@
             if (val.startsWith('http://') || val.startsWith('https://')) {
                 searchTimeout = setTimeout(() => {
                     sendToBot(type, val);
-                }, 400);
+                }, 300);
             }
         }
 
         function sendToBot(type, queryText) {
             try {
                 tg.sendData(JSON.stringify({ type: type, query: queryText }));
-                setTimeout(() => { tg.close(); }, 200);
+                setTimeout(() => { tg.close(); }, 100);
             } catch (e) {
-                alert("Please launch inside Telegram bot");
+                alert("Launch inside Telegram bot");
             }
         }
 
