@@ -62,7 +62,7 @@
       display: block;
     }
 
-    /* Поля ввода и элементы управления */
+    /* Поля ввода */
     input[type="text"], select {
       width: 100%;
       padding: 10px;
@@ -93,13 +93,13 @@
       background: #3a3a3a;
     }
 
-    /* Список результатов поиска */
+    /* Список результатов */
     .results-list {
-      margin-top: 15px;
+      margin-top: 10px;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 380px;
+      max-height: 400px;
       overflow-y: auto;
     }
 
@@ -153,7 +153,7 @@
       text-overflow: ellipsis;
     }
 
-    .no-results {
+    .status-msg {
       padding: 12px;
       color: #666;
       font-size: 12px;
@@ -199,10 +199,10 @@
 
   <!-- Вкладка MUSIC DOWNLOAD -->
   <div id="music" class="panel">
-    <input type="text" id="music-search" placeholder="Поиск песни (название / артист)..." oninput="searchMusic(this.value)">
+    <input type="text" id="music-search" placeholder="Поиск песни на площадках..." oninput="handleSearchInput(this.value)">
     
     <div class="results-list" id="music-results">
-      <!-- Результаты рендерятся динамически через JS -->
+      <div class="status-msg">Введите название песни или исполнителя</div>
     </div>
   </div>
 
@@ -210,16 +210,7 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Предустановленная база треков с качественными обложками
-    const defaultTracks = [
-      { title: "Throw Away Your Mask", artist: "Lyn", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=100&fit=crop" },
-      { title: "Linear", artist: "Chinese Cigarettes", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop" },
-      { title: "Call Girl Life", artist: "Miraidempa", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop" },
-      { title: "Disparate Youth", artist: "Santigold", img: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop" },
-      { title: "tesla - slowed electro mix", artist: "Fixupboy", img: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=100&h=100&fit=crop" },
-      { title: "Burial", artist: "Yakui The Maid", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=100&h=100&fit=crop" },
-      { title: "Clear Eyes", artist: "Aidan Swank", img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=100&h=100&fit=crop" }
-    ];
+    let searchTimeout = null;
 
     function openTab(tabName, element) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -229,47 +220,54 @@
       element.classList.add('active');
     }
 
-    function renderTrackList(tracks) {
-      const container = document.getElementById('music-results');
-      if (tracks.length === 0) {
-        container.innerHTML = `<div class="no-results">Ничего не найдено</div>`;
+    // Задержка запроса (debounce), чтобы не спамить API при каждом нажатии клавиши
+    function handleSearchInput(value) {
+      clearTimeout(searchTimeout);
+      const query = value.trim();
+
+      if (!query) {
+        document.getElementById('music-results').innerHTML = `<div class="status-msg">Введите название песни или исполнителя</div>`;
         return;
       }
 
-      container.innerHTML = tracks.map(t => `
-        <div class="track-item" onclick="sendMusicRequest('${t.title} - ${t.artist}')">
-          <img class="track-cover" src="${t.img}" alt="cover" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=100&fit=crop'">
-          <div class="track-info">
-            <div class="track-title">${t.title}</div>
-            <div class="track-artist">${t.artist}</div>
-          </div>
-        </div>
-      `).join('');
+      document.getElementById('music-results').innerHTML = `<div class="status-msg">Поиск...</div>`;
+
+      searchTimeout = setTimeout(() => {
+        searchRealTracks(query);
+      }, 400);
     }
 
-    function searchMusic(val) {
-      const query = val.trim().toLowerCase();
-      
-      if (!query) {
-        renderTrackList(defaultTracks);
-        return;
+    // Запрос к реальному API музыкальной площадки (iTunes API)
+    async function searchRealTracks(query) {
+      const container = document.getElementById('music-results');
+      try {
+        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=15`);
+        const data = await response.json();
+
+        if (!data.results || data.results.length === 0) {
+          container.innerHTML = `<div class="status-msg">Ничего не найдено</div>`;
+          return;
+        }
+
+        container.innerHTML = data.results.map(track => {
+          // Получаем картинку с нормальным разрешением вместо 100x100
+          const coverUrl = track.artworkUrl100 ? track.artworkUrl100.replace('100x100bb', '300x300bb') : '';
+          const fullTitle = `${track.trackName} - ${track.artistName}`;
+
+          return `
+            <div class="track-item" onclick="sendMusicRequest('${escapeQuotes(fullTitle)}')">
+              <img class="track-cover" src="${coverUrl}" alt="cover" onerror="this.style.display='none'">
+              <div class="track-info">
+                <div class="track-title">${escapeHtml(track.trackName)}</div>
+                <div class="track-artist">${escapeHtml(track.artistName)}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        container.innerHTML = `<div class="status-msg">Ошибка загрузки. Проверьте интернет.</div>`;
       }
-
-      // Находим совпадения из нашей базы
-      const matched = defaultTracks.filter(t => 
-        t.title.toLowerCase().includes(query) || 
-        t.artist.toLowerCase().includes(query)
-      );
-
-      // Генерируем варианты под введенное название (оригинал, slowed, remix и т.д.)
-      const dynamicResults = [
-        ...matched,
-        { title: val, artist: "Скачать оригинал", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop" },
-        { title: `${val} (Slowed + Reverb)`, artist: "Похожий вариант", img: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=100&h=100&fit=crop" },
-        { title: `${val} (Sped Up)`, artist: "Ускоренная версия", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop" }
-      ];
-
-      renderTrackList(dynamicResults);
     }
 
     function sendVideoRequest() {
@@ -287,8 +285,13 @@
       tg.close();
     }
 
-    // Инициализация стартового списка при загрузке
-    renderTrackList(defaultTracks);
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function escapeQuotes(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
   </script>
 </body>
 </html>
