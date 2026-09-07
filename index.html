@@ -3,74 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiwifyx Hub</title>
+    <title>@KiwifyxBot</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: var(--tg-theme-bg-color, #0f172a);
-            --card-bg: var(--tg-theme-secondary-bg-color, #1e293b);
-            --text-color: var(--tg-theme-text-color, #f8fafc);
-            --accent-color: #38bdf8;
-            --accent-hover: #0284c7;
+            --bg-color: #0b0f19;
+            --card-bg: #151c2c;
+            --accent-color: #2563eb;
+            --text-color: #ffffff;
+            --border-color: #2a3447;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            border-radius: 0 !important; /* Убираем скругления */
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         .header {
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .header h1 {
-            font-size: 22px;
+            font-size: 16px;
             font-weight: 700;
-            margin: 0 0 6px 0;
-            letter-spacing: -0.5px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: #94a3b8;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
         }
 
-        .header p {
-            font-size: 13px;
-            opacity: 0.6;
-            margin: 0;
+        .back-btn {
+            display: none;
+            width: 100%;
+            max-width: 400px;
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            text-align: left;
         }
 
-        .grid {
+        .container {
+            width: 100%;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            width: 100%;
-            max-width: 400px;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            transition: transform 0.15s ease;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s;
         }
 
-        .card:active {
-            transform: scale(0.98);
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-img {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            background: #1e293b;
+            border: 1px solid var(--border-color);
         }
 
         .card-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-content {
+            display: none;
+            margin-top: 15px;
         }
 
         .input-group {
@@ -80,10 +107,9 @@
 
         input {
             flex: 1;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 10px 12px;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            padding: 10px;
             color: #fff;
             font-size: 13px;
             outline: none;
@@ -93,83 +119,220 @@
             border-color: var(--accent-color);
         }
 
-        button {
+        button.action-btn {
             background: var(--accent-color);
-            color: #0f172a;
+            color: #fff;
             border: none;
-            border-radius: 10px;
             padding: 10px 16px;
-            font-weight: 600;
             font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        button:hover {
-            background: var(--accent-hover);
+        .results-list {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+        }
+
+        .result-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .result-img {
+            width: 35px;
+            height: 35px;
+            object-fit: cover;
+            background: #1e293b;
+        }
+
+        .result-text {
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .download-btn {
+            background: #10b981;
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            font-size: 11px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Kiwifyx Mini App</h1>
-        <p>Минималистичный медиа-помощник</p>
-    </div>
+    <div class="header">@KiwifyxBot</div>
 
-    <div class="grid">
-        <!-- Поиск музыки -->
-        <div class="card">
-            <div class="card-title">🎵 Поиск музыки</div>
-            <div class="input-group">
-                <input type="text" id="musicInput" placeholder="Название или исполнитель...">
-                <button onclick="sendAction('music')">Искать</button>
+    <button class="back-btn" id="backBtn" onclick="resetMenu()">← НАЗАД К МЕНЮ</button>
+
+    <div class="container" id="cardsContainer">
+        
+        <!-- Карточка 1: Музыка -->
+        <div class="card" id="card-music" onclick="openCard('music')">
+            <div class="card-header">
+                <!-- Замените src на свою картинку -->
+                <img src="https://via.placeholder.com/45/2563eb/ffffff?text=MUSIC" class="card-img" alt="img">
+                <div class="card-title">🎵 Поиск музыки</div>
+            </div>
+            <div class="card-content" id="content-music">
+                <div class="input-group">
+                    <input type="text" id="input-music" placeholder="Введите название..." onclick="event.stopPropagation()">
+                    <button class="action-btn" onclick="searchMusic(event)">ИСКАТЬ</button>
+                </div>
+                <div class="results-list" id="results-music"></div>
             </div>
         </div>
 
-        <!-- Поиск Pinterest -->
-        <div class="card">
-            <div class="card-title">📌 Pinterest фото</div>
-            <div class="input-group">
-                <input type="text" id="pinterestInput" placeholder="Эстетический запрос...">
-                <button onclick="sendAction('pinterest')">Найти</button>
+        <!-- Карточка 2: Pinterest -->
+        <div class="card" id="card-pinterest" onclick="openCard('pinterest')">
+            <div class="card-header">
+                <!-- Замените src на свою картинку -->
+                <img src="https://via.placeholder.com/45/e11d48/ffffff?text=PIN" class="card-img" alt="img">
+                <div class="card-title">📌 Pinterest фото</div>
+            </div>
+            <div class="card-content" id="content-pinterest">
+                <div class="input-group">
+                    <input type="text" id="input-pinterest" placeholder="Эстетический запрос..." onclick="event.stopPropagation()">
+                    <button class="action-btn" onclick="sendDirect('pinterest', 'input-pinterest', event)">НАЙТИ</button>
+                </div>
             </div>
         </div>
 
-        <!-- Скачивание видео -->
-        <div class="card">
-            <div class="card-title">🎬 Скачать видео</div>
-            <div class="input-group">
-                <input type="text" id="videoInput" placeholder="Ссылка на видео...">
-                <button onclick="sendAction('video')">Скачать</button>
+        <!-- Карточка 3: Видео -->
+        <div class="card" id="card-video" onclick="openCard('video')">
+            <div class="card-header">
+                <!-- Замените src на свою картинку -->
+                <img src="https://via.placeholder.com/45/0284c7/ffffff?text=VIDEO" class="card-img" alt="img">
+                <div class="card-title">🎬 Скачать видео</div>
+            </div>
+            <div class="card-content" id="content-video">
+                <div class="input-group">
+                    <input type="text" id="input-video" placeholder="Ссылка на видео..." onclick="event.stopPropagation()">
+                    <button class="action-btn" onclick="sendDirect('video', 'input-video', event)">СКАЧАТЬ</button>
+                </div>
             </div>
         </div>
 
-        <!-- Аудио из видео -->
-        <div class="card">
-            <div class="card-title">🎧 Вырезать аудио</div>
-            <div class="input-group">
-                <input type="text" id="audioInput" placeholder="Ссылка на видео...">
-                <button onclick="sendAction('audio')">Извлечь</button>
+        <!-- Карточка 4: Аудио -->
+        <div class="card" id="card-audio" onclick="openCard('audio')">
+            <div class="card-header">
+                <!-- Замените src на свою картинку -->
+                <img src="https://via.placeholder.com/45/d97706/ffffff?text=AUDIO" class="card-img" alt="img">
+                <div class="card-title">🎧 Вырезать аудио</div>
+            </div>
+            <div class="card-content" id="content-audio">
+                <div class="input-group">
+                    <input type="text" id="input-audio" placeholder="Ссылка на видео..." onclick="event.stopPropagation()">
+                    <button class="action-btn" onclick="sendDirect('audio', 'input-audio', event)">ИЗВЛЕЧЬ</button>
+                </div>
             </div>
         </div>
+
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачивает веб-приложение на весь экран
+        tg.expand();
 
-        function sendAction(type) {
-            let value = "";
-            if (type === 'music') value = document.getElementById('musicInput').value;
-            if (type === 'pinterest') value = document.getElementById('pinterestInput').value;
-            if (type === 'video') value = document.getElementById('videoInput').value;
-            if (type === 'audio') value = document.getElementById('audioInput').value;
+        let activeCardId = null;
 
-            if (!value.trim()) return;
+        function openCard(type) {
+            if (activeCardId) return;
 
-            // Отправляем данные обратно боту в Telegram
-            tg.sendData(JSON.stringify({ type: type, query: value }));
+            activeCardId = type;
+            const cards = ['music', 'pinterest', 'video', 'audio'];
+
+            cards.forEach(c => {
+                if (c !== type) {
+                    document.getElementById(`card-${c}`).style.display = 'none';
+                }
+            });
+
+            const activeCard = document.getElementById(`card-${type}`);
+            const content = document.getElementById(`content-${type}`);
+
+            content.style.display = 'block';
+            document.getElementById('backBtn').style.display = 'block';
+        }
+
+        function resetMenu() {
+            const cards = ['music', 'pinterest', 'video', 'audio'];
+            cards.forEach(c => {
+                document.getElementById(`card-${c}`).style.display = 'block';
+                document.getElementById(`content-${c}`).style.display = 'none';
+            });
+
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('results-music').innerHTML = '';
+            activeCardId = null;
+        }
+
+        // Поиск музыки (показывает 3 похожих результата с картинками)
+        function searchMusic(event) {
+            event.stopPropagation();
+            const query = document.getElementById('input-music').value.trim();
+            if (!query) return;
+
+            const resultsContainer = document.getElementById('results-music');
+            resultsContainer.innerHTML = '<div style="font-size: 12px; color: #94a3b8;">Поиск...</div>';
+
+            // Имитация вариантов с превью (при отправке передаст текст боту)
+            setTimeout(() => {
+                resultsContainer.innerHTML = `
+                    <div class="result-item">
+                        <div class="result-info">
+                            <img src="https://via.placeholder.com/35/2563eb/ffffff?text=1" class="result-img">
+                            <div class="result-text">${query} (Original Mix)</div>
+                        </div>
+                        <button class="download-btn" onclick="sendToBot('music', '${query}', event)">СКАЧАТЬ</button>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-info">
+                            <img src="https://via.placeholder.com/35/2563eb/ffffff?text=2" class="result-img">
+                            <div class="result-text">${query} (Remix)</div>
+                        </div>
+                        <button class="download-btn" onclick="sendToBot('music', '${query} remix', event)">СКАЧАТЬ</button>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-info">
+                            <img src="https://via.placeholder.com/35/2563eb/ffffff?text=3" class="result-img">
+                            <div class="result-text">${query} (Speed Up)</div>
+                        </div>
+                        <button class="download-btn" onclick="sendToBot('music', '${query} speed up', event)">СКАЧАТЬ</button>
+                    </div>
+                `;
+            }, 400);
+        }
+
+        function sendDirect(type, inputId, event) {
+            event.stopPropagation();
+            const val = document.getElementById(inputId).value.trim();
+            if (!val) return;
+            sendToBot(type, val, event);
+        }
+
+        // Отправка данных боту в сообщения
+        function sendToBot(type, queryText, event) {
+            event.stopPropagation();
+            tg.sendData(JSON.stringify({ type: type, query: queryText }));
             tg.close();
         }
     </script>
