@@ -62,7 +62,7 @@
       display: block;
     }
 
-    /* Поля ввода и форматы */
+    /* Поля ввода и элементы управления */
     input[type="text"], select {
       width: 100%;
       padding: 10px;
@@ -71,6 +71,11 @@
       color: #fff;
       border-radius: 4px;
       margin-bottom: 12px;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #555;
     }
 
     .btn-submit {
@@ -94,6 +99,8 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      max-height: 380px;
+      overflow-y: auto;
     }
 
     .track-item {
@@ -104,6 +111,7 @@
       padding: 8px;
       border-radius: 4px;
       cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
     }
 
     .track-item:hover {
@@ -115,26 +123,41 @@
       width: 48px;
       height: 48px;
       border-radius: 4px;
-      background: #333;
+      background: #222;
       margin-right: 12px;
       object-fit: cover;
+      flex-shrink: 0;
     }
 
     .track-info {
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .track-title {
       font-size: 14px;
       font-weight: bold;
       color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .track-artist {
       font-size: 12px;
       color: #888;
       margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .no-results {
+      padding: 12px;
+      color: #666;
+      font-size: 12px;
+      text-align: center;
     }
 
     .layout-video {
@@ -176,23 +199,10 @@
 
   <!-- Вкладка MUSIC DOWNLOAD -->
   <div id="music" class="panel">
-    <input type="text" id="music-search" placeholder="Поиск песни (название / Spotify ссылка)..." oninput="searchMusic(this.value)">
+    <input type="text" id="music-search" placeholder="Поиск песни (название / артист)..." oninput="searchMusic(this.value)">
     
     <div class="results-list" id="music-results">
-      <div class="track-item" onclick="sendMusicRequest('Throw Away Your Mask - Lyn')">
-        <img class="track-cover" src="https://via.placeholder.com/48" alt="cover">
-        <div class="track-info">
-          <div class="track-title">Throw Away Your Mask</div>
-          <div class="track-artist">Lyn</div>
-        </div>
-      </div>
-      <div class="track-item" onclick="sendMusicRequest('Linear - Chinese Cigarettes')">
-        <img class="track-cover" src="https://via.placeholder.com/48" alt="cover">
-        <div class="track-info">
-          <div class="track-title">Linear</div>
-          <div class="track-artist">Chinese Cigarettes</div>
-        </div>
-      </div>
+      <!-- Результаты рендерятся динамически через JS -->
     </div>
   </div>
 
@@ -200,12 +210,66 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
+    // Предустановленная база треков с качественными обложками
+    const defaultTracks = [
+      { title: "Throw Away Your Mask", artist: "Lyn", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=100&fit=crop" },
+      { title: "Linear", artist: "Chinese Cigarettes", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop" },
+      { title: "Call Girl Life", artist: "Miraidempa", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop" },
+      { title: "Disparate Youth", artist: "Santigold", img: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop" },
+      { title: "tesla - slowed electro mix", artist: "Fixupboy", img: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=100&h=100&fit=crop" },
+      { title: "Burial", artist: "Yakui The Maid", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=100&h=100&fit=crop" },
+      { title: "Clear Eyes", artist: "Aidan Swank", img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=100&h=100&fit=crop" }
+    ];
+
     function openTab(tabName, element) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       
       document.getElementById(tabName).classList.add('active');
       element.classList.add('active');
+    }
+
+    function renderTrackList(tracks) {
+      const container = document.getElementById('music-results');
+      if (tracks.length === 0) {
+        container.innerHTML = `<div class="no-results">Ничего не найдено</div>`;
+        return;
+      }
+
+      container.innerHTML = tracks.map(t => `
+        <div class="track-item" onclick="sendMusicRequest('${t.title} - ${t.artist}')">
+          <img class="track-cover" src="${t.img}" alt="cover" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=100&fit=crop'">
+          <div class="track-info">
+            <div class="track-title">${t.title}</div>
+            <div class="track-artist">${t.artist}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function searchMusic(val) {
+      const query = val.trim().toLowerCase();
+      
+      if (!query) {
+        renderTrackList(defaultTracks);
+        return;
+      }
+
+      // Находим совпадения из нашей базы
+      const matched = defaultTracks.filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        t.artist.toLowerCase().includes(query)
+      );
+
+      // Генерируем варианты под введенное название (оригинал, slowed, remix и т.д.)
+      const dynamicResults = [
+        ...matched,
+        { title: val, artist: "Скачать оригинал", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop" },
+        { title: `${val} (Slowed + Reverb)`, artist: "Похожий вариант", img: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=100&h=100&fit=crop" },
+        { title: `${val} (Sped Up)`, artist: "Ускоренная версия", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop" }
+      ];
+
+      renderTrackList(dynamicResults);
     }
 
     function sendVideoRequest() {
@@ -223,27 +287,8 @@
       tg.close();
     }
 
-    function searchMusic(val) {
-      if (!val) return;
-      const resultsContainer = document.getElementById('music-results');
-      
-      resultsContainer.innerHTML = `
-        <div class="track-item" onclick="sendMusicRequest('${val}')">
-          <img class="track-cover" src="https://via.placeholder.com/48" alt="cover">
-          <div class="track-info">
-            <div class="track-title">${val}</div>
-            <div class="track-artist">Скачать оригинал</div>
-          </div>
-        </div>
-        <div class="track-item" onclick="sendMusicRequest('${val} remix')">
-          <img class="track-cover" src="https://via.placeholder.com/48" alt="cover">
-          <div class="track-info">
-            <div class="track-title">${val} (Remix)</div>
-            <div class="track-artist">Похожий трек</div>
-          </div>
-        </div>
-      `;
-    }
+    // Инициализация стартового списка при загрузке
+    renderTrackList(defaultTracks);
   </script>
 </body>
 </html>
