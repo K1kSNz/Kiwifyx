@@ -59,10 +59,6 @@
             text-align: left;
         }
 
-        .back-btn:hover {
-            background: var(--hover-bg);
-        }
-
         .container {
             width: 100%;
             max-width: 500px;
@@ -81,7 +77,6 @@
         .card-title {
             font-size: 13px;
             font-weight: bold;
-            color: var(--text-main);
         }
 
         .card-content {
@@ -118,7 +113,6 @@
         .track-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             background: var(--input-bg);
             border: 1px solid var(--border-color);
             padding: 6px 8px;
@@ -128,13 +122,6 @@
 
         .track-item:hover {
             background: var(--hover-bg);
-        }
-
-        .track-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            overflow: hidden;
         }
 
         .track-cover {
@@ -165,16 +152,26 @@
             font-size: 11px;
             color: var(--text-sub);
             margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        }
+
+        .toast-notify {
+            display: none;
+            padding: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            color: var(--text-main);
+            font-size: 11px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
     <div class="header">Kiwifyx / Control Panel</div>
-
+    <div class="toast-notify" id="toast">⏳ Отправка в чат...</div>
     <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
     <div class="container">
@@ -215,9 +212,11 @@
                 <input type="text" id="input-audio" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
             </div>
         </div>
+
     </div>
 
     <script>
+        const BOT_TOKEN = "8580096170:AAFQiRDRTdj18TXDO2m3neMP2gJqEWMSjl0";
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -242,8 +241,6 @@
                 if (input) input.value = '';
                 const res = document.getElementById(`results-${t}`);
                 if (res) res.innerHTML = '';
-                const st = document.getElementById(`status-${t}`);
-                if (st) st.style.display = 'none';
             });
             document.getElementById('backBtn').style.display = 'none';
             activeType = null;
@@ -258,11 +255,6 @@
             if (!query) {
                 resBox.innerHTML = '';
                 status.style.display = 'none';
-                return;
-            }
-
-            if (query.startsWith('http://') || query.startsWith('https://')) {
-                sendToBot(type, query);
                 return;
             }
 
@@ -284,56 +276,77 @@
                                 const fullQuery = `${artist} - ${title}`;
 
                                 html += `
-                                    <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(fullQuery)}')">
-                                        <div class="track-left">
-                                            <img class="track-cover" src="${cover}" alt="cover">
-                                            <div class="track-info">
-                                                <div class="track-title">${escapeHtml(title)}</div>
-                                                <div class="track-artist">${escapeHtml(artist)}</div>
-                                            </div>
+                                    <div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(fullQuery)}')">
+                                        <img class="track-cover" src="${cover}">
+                                        <div class="track-info">
+                                            <div class="track-title">${escapeHtml(title)}</div>
+                                            <div class="track-artist">${escapeHtml(artist)}</div>
                                         </div>
                                     </div>
                                 `;
                             });
                         }
-                        html += `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Скачать: "${escapeHtml(query)}"</div></div>`;
+                        html += `<div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
                         resBox.innerHTML = html;
                     })
                     .catch(() => {
                         status.style.display = 'none';
-                        resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Скачать: "${escapeHtml(query)}"</div></div>`;
+                        resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
                     });
             }, 300);
         }
 
         function handleDirectText(type) {
-            clearTimeout(searchTimeout);
             const query = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
-            if (!query) {
-                resBox.innerHTML = '';
-                return;
-            }
-            resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">🔍 Найти: "${escapeHtml(query)}"</div></div>`;
+            if (!query) { resBox.innerHTML = ''; return; }
+            resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(query)}')"><div class="track-title">🔍 Искать: "${escapeHtml(query)}"</div></div>`;
         }
 
         function handleDirectLink(type) {
-            clearTimeout(searchTimeout);
             const val = document.getElementById(`input-${type}`).value.trim();
             if (val.startsWith('http://') || val.startsWith('https://')) {
-                searchTimeout = setTimeout(() => {
-                    sendToBot(type, val);
-                }, 300);
+                sendDirectMessage(type, val);
             }
         }
 
-        // Мгновенная передача выбранного трека в бот
-        function sendToBot(type, queryText) {
-            try {
-                tg.sendData(JSON.stringify({ type: type, query: queryText }));
-            } catch (e) {
-                alert("Ошибка взаимодействия с Telegram.");
+        // Прямой запрос к API Telegram (работает гарантированно)
+        function sendDirectMessage(type, queryText) {
+            const toast = document.getElementById('toast');
+            toast.innerText = "⏳ Отправка запроса...";
+            toast.style.display = 'block';
+
+            const userChatId = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+
+            if (!userChatId) {
+                alert("Ошибка: Не удалось определить Telegram ID. Откройте приложение внутри Telegram!");
+                toast.style.display = 'none';
+                return;
             }
+
+            // Бот отправляет служебный текст в чат, а Python скрипт его перехватывает
+            const commandText = `/dl_${type} ${queryText}`;
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: userChatId,
+                    text: commandText
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    toast.innerText = "✅ Запрос отправлен в чат!";
+                    setTimeout(() => { toast.style.display = 'none'; }, 2000);
+                } else {
+                    toast.innerText = "❌ Ошибка отправки!";
+                }
+            })
+            .catch(() => {
+                toast.innerText = "❌ Ошибка сети!";
+            });
         }
 
         function escapeHtml(str) {
