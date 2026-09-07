@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@KiwifyxBot</title>
+    <title>Kiwifyx</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #1c1c22;
-            --card-bg: #272730;
-            --input-bg: #141418;
-            --border-color: #383845;
-            --btn-green: #2a9d8f;
-            --text-main: #f1f1f1;
-            --text-sub: #9a9ab0;
+            --bg-color: #121212;
+            --card-bg: #181818;
+            --hover-bg: #282828;
+            --input-bg: #0f0f0f;
+            --border-color: #2a2a2a;
+            --text-main: #e1e1e1;
+            --text-sub: #888888;
+            --accent-color: #4a90e2;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            border-radius: 0 !important;
+            font-family: Consolas, "Courier New", monospace;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 14px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -35,13 +35,13 @@
 
         .header {
             width: 100%;
-            max-width: 420px;
-            text-align: center;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-            color: var(--text-sub);
+            max-width: 500px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            color: var(--text-main);
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
         }
@@ -49,88 +49,72 @@
         .back-btn {
             display: none;
             width: 100%;
-            max-width: 420px;
+            max-width: 500px;
             background: var(--card-bg);
             color: var(--text-main);
             border: 1px solid var(--border-color);
-            padding: 10px;
+            padding: 8px 12px;
             font-size: 12px;
-            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 12px;
-            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .back-btn:hover {
+            background: var(--hover-bg);
         }
 
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 12px;
+            padding: 10px;
             cursor: pointer;
         }
 
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .icon-box {
-            width: 40px;
-            height: 40px;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-box svg {
-            width: 20px;
-            height: 20px;
-            fill: var(--text-main);
+        .card:hover {
+            background: var(--hover-bg);
         }
 
         .card-title {
             font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
+            font-weight: bold;
+            color: var(--text-main);
         }
 
         .card-content {
             display: none;
-            margin-top: 12px;
+            margin-top: 10px;
         }
 
         input {
             width: 100%;
             background: var(--input-bg);
             border: 1px solid var(--border-color);
-            padding: 10px 12px;
+            padding: 8px 10px;
             color: var(--text-main);
-            font-size: 13px;
+            font-size: 12px;
             outline: none;
         }
 
         input:focus {
-            border-color: var(--text-sub);
+            border-color: #555;
         }
 
-        /* Листаемый список результатов */
         .results-list {
-            margin-top: 10px;
-            max-height: 280px;
+            margin-top: 8px;
+            max-height: 380px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
         }
 
         .results-list::-webkit-scrollbar {
@@ -140,165 +124,117 @@
             background: var(--border-color);
         }
 
-        .result-item {
+        .track-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: var(--input-bg);
             border: 1px solid var(--border-color);
-            padding: 8px;
+            padding: 6px 8px;
+            cursor: pointer;
             gap: 10px;
         }
 
-        .result-info {
+        .track-item:hover {
+            background: var(--card-bg);
+        }
+
+        .track-left {
             display: flex;
             align-items: center;
             gap: 10px;
             overflow: hidden;
         }
 
-        .result-text-block {
+        .track-cover {
+            width: 42px;
+            height: 42px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #222;
+            flex-shrink: 0;
+        }
+
+        .track-info {
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        .result-title {
+        .track-title {
             font-size: 12px;
-            font-weight: 600;
+            font-weight: bold;
+            color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 200px;
         }
 
-        .result-author {
-            font-size: 10px;
-            color: var(--text-sub);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
+        .track-title .date-tag {
+            color: var(--accent-color);
+            font-weight: normal;
         }
 
-        .download-btn {
-            background: var(--btn-green);
-            color: #fff;
-            border: none;
-            padding: 8px 12px;
+        .track-artist {
             font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
+            color: var(--text-sub);
+            margin-top: 2px;
             white-space: nowrap;
-        }
-
-        .loader-box {
-            display: none;
-            margin-top: 10px;
-            padding: 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: var(--border-color);
-            margin-top: 8px;
             overflow: hidden;
-            position: relative;
+            text-overflow: ellipsis;
         }
 
-        .progress-fill {
-            width: 30%;
-            height: 100%;
-            background: var(--btn-green);
-            position: absolute;
-            animation: loadingAnim 1.2s infinite ease-in-out;
-        }
-
-        @keyframes loadingAnim {
-            0% { left: -30%; }
-            100% { left: 100%; }
+        .status-text {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 6px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">@KiwifyxBot</div>
+    <div class="header">Kiwifyx / Search</div>
 
-    <button class="back-btn" id="backBtn" onclick="resetMenu()">← НАЗАД К МЕНЮ</button>
+    <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Back to Menu</button>
 
     <div class="container">
         
-        <!-- 1. МУЗЫКА -->
+        <!-- MUSIC -->
         <div class="card" id="card-music" onclick="openCard('music')">
-            <div class="card-header">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                </div>
-                <div class="card-title">🎵 Поиск музыки</div>
-            </div>
+            <div class="card-title">Music Search</div>
             <div class="card-content" id="content-music">
-                <input type="text" id="input-music" placeholder="Введите название или автора..." oninput="liveSearchMusic()" onclick="event.stopPropagation()">
-                <div class="loader-box" id="loader-music">
-                    <span style="font-size: 11px; color: var(--text-sub);">Отправка боту...</span>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
-                </div>
+                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="searchMusic()" onclick="event.stopPropagation()">
+                <div class="status-text" id="status-music">Searching...</div>
                 <div class="results-list" id="results-music"></div>
             </div>
         </div>
 
-        <!-- 2. PHOTO -->
+        <!-- PHOTO -->
         <div class="card" id="card-photo" onclick="openCard('photo')">
-            <div class="card-header">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                </div>
-                <div class="card-title">📸 Поиск Photo</div>
-            </div>
+            <div class="card-title">Photo Search</div>
             <div class="card-content" id="content-photo">
-                <input type="text" id="input-photo" placeholder="Поиск изображений..." oninput="liveSearchPhoto()" onclick="event.stopPropagation()">
-                <div class="loader-box" id="loader-photo">
-                    <span style="font-size: 11px; color: var(--text-sub);">Поиск картинок...</span>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
-                </div>
+                <input type="text" id="input-photo" placeholder="Search image..." oninput="searchPhoto()" onclick="event.stopPropagation()">
+                <div class="status-text" id="status-photo">Searching...</div>
                 <div class="results-list" id="results-photo"></div>
             </div>
         </div>
 
-        <!-- 3. ВИДЕО -->
+        <!-- VIDEO -->
         <div class="card" id="card-video" onclick="openCard('video')">
-            <div class="card-header">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
-                </div>
-                <div class="card-title">🎬 Скачать видео</div>
-            </div>
+            <div class="card-title">Video Download</div>
             <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('video')" onclick="event.stopPropagation()">
-                <div class="loader-box" id="loader-video">
-                    <span style="font-size: 11px; color: var(--text-sub);">Загрузка видео...</span>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
-                </div>
+                <input type="text" id="input-video" placeholder="Paste link..." oninput="handleDirectLink('video')" onclick="event.stopPropagation()">
+                <div class="status-text" id="status-video">Processing link...</div>
             </div>
         </div>
 
-        <!-- 4. АУДИО -->
+        <!-- AUDIO -->
         <div class="card" id="card-audio" onclick="openCard('audio')">
-            <div class="card-header">
-                <div class="icon-box">
-                    <svg viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
-                </div>
-                <div class="card-title">🎧 Вырезать аудио</div>
-            </div>
+            <div class="card-title">Audio Extract</div>
             <div class="card-content" id="content-audio">
-                <input type="text" id="input-audio" placeholder="Вставьте ссылку..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
-                <div class="loader-box" id="loader-audio">
-                    <span style="font-size: 11px; color: var(--text-sub);">Извлечение аудио...</span>
-                    <div class="progress-bar"><div class="progress-fill"></div></div>
-                </div>
+                <input type="text" id="input-audio" placeholder="Paste link..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
+                <div class="status-text" id="status-audio">Processing link...</div>
             </div>
         </div>
 
@@ -329,83 +265,99 @@
                 if (input) input.value = '';
                 const res = document.getElementById(`results-${t}`);
                 if (res) res.innerHTML = '';
-                const loader = document.getElementById(`loader-${t}`);
-                if (loader) loader.style.display = 'none';
+                const status = document.getElementById(`status-${t}`);
+                if (status) status.style.display = 'none';
             });
             document.getElementById('backBtn').style.display = 'none';
             activeType = null;
         }
 
-        function liveSearchMusic() {
+        // Поиск музыки через открытый API Deezer с настоящими обложками
+        function searchMusic() {
             clearTimeout(searchTimeout);
-            const val = document.getElementById('input-music').value.trim();
+            const query = document.getElementById('input-music').value.trim();
             const resBox = document.getElementById('results-music');
-            
-            if (!val) { resBox.innerHTML = ''; return; }
+            const status = document.getElementById('status-music');
+
+            if (!query) {
+                resBox.innerHTML = '';
+                status.style.display = 'none';
+                return;
+            }
+
+            status.style.display = 'block';
 
             searchTimeout = setTimeout(() => {
-                const list = [
-                    { title: `${val}`, author: "Оригинальная версия" },
-                    { title: `${val} (Remix)`, author: "Club / Dance Edition" },
-                    { title: `${val} (Speed Up)`, author: "TikTok Trend" },
-                    { title: `${val} (Slowed + Reverb)`, author: "Lo-Fi Version" },
-                    { title: `${val} (Acoustic)`, author: "Acoustic Cover" },
-                    { title: `${val} (Instrumental)`, author: "Karaoke / Beat" }
-                ];
+                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.deezer.com/search?q=' + query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        status.style.display = 'none';
+                        const parsed = JSON.parse(data.contents);
+                        if (!parsed.data || parsed.data.length === 0) {
+                            resBox.innerHTML = '<div class="track-artist" style="padding:8px;">No results found</div>';
+                            return;
+                        }
 
-                let html = '';
-                list.forEach((item) => {
-                    html += `
-                        <div class="result-item">
-                            <div class="result-info">
-                                <div class="icon-box" style="width:30px; height:30px;">
-                                    <svg viewBox="0 0 24 24" style="width:14px; height:14px;"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                        let html = '';
+                        parsed.data.slice(0, 15).forEach(item => {
+                            const cover = item.album.cover_medium || item.album.cover_small;
+                            const title = item.title;
+                            const artist = item.artist.name;
+                            const fullQuery = `${artist} - ${title}`;
+
+                            html += `
+                                <div class="track-item" onclick="sendToBot('music', '${escapeQuotes(fullQuery)}')">
+                                    <div class="track-left">
+                                        <img class="track-cover" src="${cover}" alt="cover">
+                                        <div class="track-info">
+                                            <div class="track-title">${escapeHtml(title)}</div>
+                                            <div class="track-artist">${escapeHtml(artist)}</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="result-text-block">
-                                    <div class="result-title">${item.title}</div>
-                                    <div class="result-author">👤 ${item.author}</div>
-                                </div>
-                            </div>
-                            <button class="download-btn" onclick="sendToBot('music', '${item.title}')">СКАЧАТЬ</button>
-                        </div>
-                    `;
-                });
-                resBox.innerHTML = html;
-            }, 300);
+                            `;
+                        });
+                        resBox.innerHTML = html;
+                    })
+                    .catch(() => {
+                        status.style.display = 'none';
+                    });
+            }, 400);
         }
 
-        function liveSearchPhoto() {
+        // Поиск картинок
+        function searchPhoto() {
             clearTimeout(searchTimeout);
-            const val = document.getElementById('input-photo').value.trim();
+            const query = document.getElementById('input-photo').value.trim();
             const resBox = document.getElementById('results-photo');
+            const status = document.getElementById('status-photo');
 
-            if (!val) { resBox.innerHTML = ''; return; }
+            if (!query) {
+                resBox.innerHTML = '';
+                status.style.display = 'none';
+                return;
+            }
+
+            status.style.display = 'block';
 
             searchTimeout = setTimeout(() => {
-                const photoOptions = [
-                    { title: `${val} Aesthetic`, author: "Pinterest Collection" },
-                    { title: `${val} HD Wallpaper`, author: "Background Art" },
-                    { title: `${val} Minimalist`, author: "Clean Aesthetic" },
-                    { title: `${val} Vintage`, author: "Retro Vibe" }
-                ];
-
+                status.style.display = 'none';
                 let html = '';
-                photoOptions.forEach((item) => {
+                for (let i = 1; i <= 6; i++) {
+                    const imgUrl = `https://picsum.photos/seed/${encodeURIComponent(query + i)}/200/200`;
+                    const itemTitle = `${query} · Option ${i}`;
                     html += `
-                        <div class="result-item">
-                            <div class="result-info">
-                                <div class="icon-box" style="width:30px; height:30px;">
-                                    <svg viewBox="0 0 24 24" style="width:14px; height:14px;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                                </div>
-                                <div class="result-text-block">
-                                    <div class="result-title">${item.title}</div>
-                                    <div class="result-author">📌 ${item.author}</div>
+                        <div class="track-item" onclick="sendToBot('photo', '${escapeQuotes(query)}')">
+                            <div class="track-left">
+                                <img class="track-cover" src="${imgUrl}" alt="photo">
+                                <div class="track-info">
+                                    <div class="track-title">${escapeHtml(itemTitle)}</div>
+                                    <div class="track-artist">Collection</div>
                                 </div>
                             </div>
-                            <button class="download-btn" onclick="sendToBot('photo', '${item.title}')">ПОЛУЧИТЬ</button>
                         </div>
                     `;
-                });
+                }
                 resBox.innerHTML = html;
             }, 300);
         }
@@ -416,21 +368,31 @@
             if (val.startsWith('http://') || val.startsWith('https://')) {
                 searchTimeout = setTimeout(() => {
                     sendToBot(type, val);
-                }, 500);
+                }, 400);
             }
         }
 
         function sendToBot(type, queryText) {
-            const loader = document.getElementById(`loader-${type}`);
-            if (loader) loader.style.display = 'block';
+            const status = document.getElementById(`status-${type}`);
+            if (status) {
+                status.innerText = "Sending request to Telegram...";
+                status.style.display = 'block';
+            }
 
             try {
                 tg.sendData(JSON.stringify({ type: type, query: queryText }));
-                setTimeout(() => { tg.close(); }, 500);
+                setTimeout(() => { tg.close(); }, 300);
             } catch (e) {
-                alert("Запускайте Web App внутри бота Telegram!");
-                if (loader) loader.style.display = 'none';
+                alert("Please launch inside Telegram bot");
             }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
         }
     </script>
 </body>
