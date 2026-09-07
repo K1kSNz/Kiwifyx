@@ -6,168 +6,28 @@
     <title>Kiwifyx / Control Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', Courier, monospace, sans-serif;
-        }
-
-        body {
-            background-color: #0d0d0d;
-            color: #e0e0e0;
-            padding: 15px;
-        }
-
-        .header {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #ffffff;
-            border-bottom: 1px solid #222;
-            padding-bottom: 8px;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            background: #1a1a1a;
-            color: #fff;
-            border: 1px solid #333;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-            flex: 1;
-            text-align: center;
-        }
-
-        .tab-btn.active {
-            background: #2a2a2a;
-            border-color: #555;
-        }
-
-        .panel {
-            display: none;
-            background: #141414;
-            border: 1px solid #262626;
-            border-radius: 6px;
-            padding: 15px;
-        }
-
-        .panel.active {
-            display: block;
-        }
-
-        input[type="text"], select {
-            width: 100%;
-            padding: 10px;
-            background: #080808;
-            border: 1px solid #333;
-            color: #fff;
-            border-radius: 4px;
-            margin-bottom: 12px;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: #555;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 10px;
-            background: #2b2b2b;
-            color: #fff;
-            border: 1px solid #444;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 4px;
-        }
-
-        .btn-submit:hover {
-            background: #3a3a3a;
-        }
-
-        .results-list {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .track-item {
-            display: flex;
-            align-items: center;
-            background: #181818;
-            border: 1px solid #282828;
-            padding: 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .track-item:hover {
-            border-color: #444;
-            background: #202020;
-        }
-
-        .track-cover {
-            width: 48px;
-            height: 48px;
-            border-radius: 4px;
-            background: #222;
-            margin-right: 12px;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .track-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .track-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #ffffff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-artist {
-            font-size: 12px;
-            color: #888;
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .status-msg {
-            padding: 12px;
-            color: #666;
-            font-size: 12px;
-            text-align: center;
-        }
-
-        .layout-video {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .layout-video-bottom {
-            display: flex;
-            gap: 10px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace, sans-serif; }
+        body { background-color: #0d0d0d; color: #e0e0e0; padding: 15px; }
+        .header { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #ffffff; border-bottom: 1px solid #222; padding-bottom: 8px; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px 15px; cursor: pointer; border-radius: 4px; flex: 1; text-align: center; }
+        .tab-btn.active { background: #2a2a2a; border-color: #555; }
+        .panel { display: none; background: #141414; border: 1px solid #262626; border-radius: 6px; padding: 15px; }
+        .panel.active { display: block; }
+        input[type="text"], select { width: 100%; padding: 10px; background: #080808; border: 1px solid #333; color: #fff; border-radius: 4px; margin-bottom: 12px; outline: none; }
+        input[type="text"]:focus { border-color: #555; }
+        .btn-submit { width: 100%; padding: 10px; background: #2b2b2b; color: #fff; border: 1px solid #444; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .btn-submit:hover { background: #3a3a3a; }
+        .results-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+        .track-item { display: flex; align-items: center; background: #181818; border: 1px solid #282828; padding: 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+        .track-item:hover { border-color: #444; background: #202020; }
+        .track-cover { width: 48px; height: 48px; border-radius: 4px; background: #222; margin-right: 12px; object-fit: cover; flex-shrink: 0; }
+        .track-info { display: flex; flex-direction: column; overflow: hidden; }
+        .track-title { font-size: 14px; font-weight: bold; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 12px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .status-msg { padding: 12px; color: #666; font-size: 12px; text-align: center; }
+        .layout-video { display: flex; flex-direction: column; gap: 10px; }
+        .layout-video-bottom { display: flex; gap: 10px; }
     </style>
 </head>
 <body>
@@ -179,10 +39,10 @@
         <button class="tab-btn" onclick="openTab('music', this)">Music Download</button>
     </div>
 
-    <!-- Вкладка VIDEO DOWNLOAD -->
+    <!-- VIDEO -->
     <div id="video" class="panel active">
         <div class="layout-video">
-            <input type="text" id="video-url" placeholder="Вставьте ссылку на YouTube или другое видео...">
+            <input type="text" id="video-url" placeholder="Вставьте ссылку на YouTube, TikTok, VK...">
             <div class="layout-video-bottom">
                 <select id="video-quality" style="flex: 2;">
                     <option value="1080p">1080p Quality</option>
@@ -195,10 +55,9 @@
         </div>
     </div>
 
-    <!-- Вкладка MUSIC DOWNLOAD -->
+    <!-- MUSIC -->
     <div id="music" class="panel">
         <input type="text" id="music-search" placeholder="Ссылка на трек или название песни..." oninput="handleSearchInput(this.value)">
-        
         <div class="results-list" id="music-results">
             <div class="status-msg">Введите название песни или вставьте ссылку</div>
         </div>
@@ -214,7 +73,6 @@
         function openTab(tabName, element) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            
             document.getElementById(tabName).classList.add('active');
             element.classList.add('active');
         }
@@ -228,7 +86,6 @@
                 return;
             }
 
-            // Если вставлена ссылка (Spotify, YouTube, SoundCloud и др.)
             if (query.startsWith('http://') || query.startsWith('https://')) {
                 document.getElementById('music-results').innerHTML = `
                     <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="sendMusicRequest('${escapeQuotes(query)}')">
@@ -271,7 +128,7 @@
                 }).join('');
 
             } catch (err) {
-                container.innerHTML = `<div class="status-msg">Ошибка загрузки. Проверьте интернет.</div>`;
+                container.innerHTML = `<div class="status-msg">Ошибка поиска. Попробуйте вставить прямую ссылку.</div>`;
             }
         }
 
@@ -290,13 +147,8 @@
             tg.close();
         }
 
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        function escapeQuotes(str) {
-            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        }
+        function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        function escapeQuotes(str) { return str.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
     </script>
 </body>
 </html>
