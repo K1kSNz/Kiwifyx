@@ -62,25 +62,6 @@
       display: block;
     }
 
-    /* Сетка Меню как на первой картинке */
-    .menu-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .menu-card {
-      background: #1f1f1f;
-      border: 1px solid #333;
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
     /* Поля ввода и форматы */
     input[type="text"], select {
       width: 100%;
@@ -107,7 +88,7 @@
       background: #3a3a3a;
     }
 
-    /* Список результатов поиска (по макету с фото) */
+    /* Список результатов поиска */
     .results-list {
       margin-top: 15px;
       display: flex;
@@ -173,21 +154,12 @@
   <div class="header">Kiwifyx / Control Panel</div>
 
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="openTab('menu')">Menu</button>
-    <button class="tab-btn" onclick="openTab('video')">Video Download</button>
-    <button class="tab-btn" onclick="openTab('music')">Music Download</button>
-  </div>
-
-  <!-- Вкладка MENU -->
-  <div id="menu" class="panel active">
-    <div class="menu-grid">
-      <div class="menu-card" onclick="openTab('video')">Video</div>
-      <div class="menu-card" onclick="openTab('music')">Music</div>
-    </div>
+    <button class="tab-btn active" onclick="openTab('video', this)">Video Download</button>
+    <button class="tab-btn" onclick="openTab('music', this)">Music Download</button>
   </div>
 
   <!-- Вкладка VIDEO DOWNLOAD -->
-  <div id="video" class="panel">
+  <div id="video" class="panel active">
     <div class="layout-video">
       <input type="text" id="video-url" placeholder="Вставьте ссылку на YouTube...">
       <div class="layout-video-bottom">
@@ -207,7 +179,6 @@
     <input type="text" id="music-search" placeholder="Поиск песни (название / Spotify ссылка)..." oninput="searchMusic(this.value)">
     
     <div class="results-list" id="music-results">
-      <!-- Пример карточки в точности как на скриншоте -->
       <div class="track-item" onclick="sendMusicRequest('Throw Away Your Mask - Lyn')">
         <img class="track-cover" src="https://via.placeholder.com/48" alt="cover">
         <div class="track-info">
@@ -229,11 +200,12 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    function openTab(tabName) {
+    function openTab(tabName, element) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       
       document.getElementById(tabName).classList.add('active');
+      element.classList.add('active');
     }
 
     function sendVideoRequest() {
@@ -242,7 +214,6 @@
       if (!url) return alert('Введите ссылку!');
       
       const mode = quality === 'audio' ? 'audio' : 'video';
-      // Передаем данные боту в формате string
       tg.sendData(`${mode}|||${url}|||${quality}`);
       tg.close();
     }
@@ -252,12 +223,10 @@
       tg.close();
     }
 
-    // Имитация поиска с выводом аналогичных песен
     function searchMusic(val) {
       if (!val) return;
       const resultsContainer = document.getElementById('music-results');
       
-      // Динамический вывод результатов поиска
       resultsContainer.innerHTML = `
         <div class="track-item" onclick="sendMusicRequest('${val}')">
           <img class="track-cover" src="https://via.placeholder.com/48" alt="cover">
