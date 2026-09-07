@@ -14,172 +14,66 @@
             --border-color: #2a2a2a;
             --text-main: #e1e1e1;
             --text-sub: #888888;
-            --accent-color: #0088cc;
+            --accent-green: #1db954;
+            --accent-red: #ff0000;
+            --accent-blue: #0088cc;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Consolas, "Courier New", monospace;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .header {
-            width: 100%;
-            max-width: 500px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-
-        .back-btn {
-            display: none;
-            width: 100%;
-            max-width: 500px;
-            background: var(--card-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .card-title {
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .card-content {
-            display: none;
-            margin-top: 10px;
-        }
-
-        input {
-            width: 100%;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            padding: 8px 10px;
-            color: var(--text-main);
-            font-size: 12px;
-            outline: none;
-        }
-
-        .status {
-            font-size: 11px;
-            color: var(--text-sub);
-            margin-top: 6px;
-            display: none;
-        }
-
-        .results-list {
-            margin-top: 8px;
-            max-height: 380px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .track-item {
-            display: flex;
-            align-items: center;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            padding: 6px 8px;
-            cursor: pointer;
-            gap: 10px;
-        }
-
-        .track-item:hover {
-            background: var(--hover-bg);
-        }
-
-        .track-cover {
-            width: 60px;
-            height: 40px;
-            border-radius: 4px;
-            object-fit: cover;
-            background: #222;
-        }
-
-        .track-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .track-title {
-            font-size: 12px;
-            font-weight: bold;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-artist {
-            font-size: 11px;
-            color: var(--text-sub);
-            margin-top: 2px;
-        }
-
-        .toast-notify {
-            display: none;
-            padding: 8px;
-            background: var(--card-bg);
-            border: 1px solid var(--accent-color);
-            font-size: 11px;
-            margin-bottom: 10px;
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Consolas, monospace; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        .header { width: 100%; max-width: 500px; font-size: 14px; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .back-btn { display: none; width: 100%; max-width: 500px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px; font-size: 12px; cursor: pointer; margin-bottom: 10px; }
+        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 6px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 10px; cursor: pointer; }
+        .card-title { font-size: 13px; font-weight: bold; }
+        .card-content { display: none; margin-top: 10px; }
+        input { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; color: var(--text-main); font-size: 12px; outline: none; }
+        .status { font-size: 11px; color: var(--text-sub); margin-top: 6px; display: none; }
+        .results-list { margin-top: 8px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+        
+        /* Стили списка результатов */
+        .track-item { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; cursor: pointer; gap: 10px; }
+        .track-item:hover { background: var(--hover-bg); }
+        .music-cover { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; background: #222; }
+        .video-cover { width: 70px; height: 40px; border-radius: 4px; object-fit: cover; background: #222; }
+        
+        .track-info { display: flex; flex-direction: column; overflow: hidden; }
+        .track-title { font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+        
+        .btn-action { margin-top: 8px; width: 100%; border: none; color: white; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .btn-music { background: var(--accent-green); }
+        .btn-video { background: var(--accent-red); }
+        .btn-photo { background: var(--accent-blue); }
     </style>
 </head>
 <body>
 
     <div class="header">Kiwifyx / Control Panel</div>
-    <div class="toast-notify" id="toast">⏳ Отправка в чат...</div>
     <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
     <div class="container">
-        <!-- MUSIC -->
+        <!-- МУЗЫКА И SPOTIFY -->
         <div class="card" id="card-music" onclick="openCard('music')">
-            <div class="card-title">🎵 Music Search</div>
+            <div class="card-title">🎵 Music & Spotify Search</div>
             <div class="card-content" id="content-music">
-                <input type="text" id="input-music" placeholder="Песня или исполнитель..." oninput="searchItunes('music')" onclick="event.stopPropagation()">
-                <div class="status" id="status-music">Поиск...</div>
+                <input type="text" id="input-music" placeholder="Ссылка Spotify/URL или название песни..." oninput="handleMusicInput()" onclick="event.stopPropagation()">
+                <div class="status" id="status-music">Поиск треков...</div>
                 <div class="results-list" id="results-music"></div>
             </div>
         </div>
 
-        <!-- PHOTO -->
+        <!-- ВИДЕО YOUTUBE -->
+        <div class="card" id="card-video" onclick="openCard('video')">
+            <div class="card-title">🎥 YouTube Video Search</div>
+            <div class="card-content" id="content-video">
+                <input type="text" id="input-video" placeholder="Ссылка YouTube или название видео..." oninput="handleVideoInput()" onclick="event.stopPropagation()">
+                <div class="status" id="status-video">Поиск роликов...</div>
+                <div class="results-list" id="results-video"></div>
+            </div>
+        </div>
+
+        <!-- ФОТО -->
         <div class="card" id="card-photo" onclick="openCard('photo')">
             <div class="card-title">🖼 Photo Search</div>
             <div class="card-content" id="content-photo">
@@ -187,28 +81,9 @@
                 <div class="results-list" id="results-photo"></div>
             </div>
         </div>
-
-        <!-- VIDEO -->
-        <div class="card" id="card-video" onclick="openCard('video')">
-            <div class="card-title">🎥 Video Search (YouTube)</div>
-            <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Поиск ролика в YouTube..." oninput="searchYoutube('video')" onclick="event.stopPropagation()">
-                <div class="status" id="status-video">Поиск...</div>
-                <div class="results-list" id="results-video"></div>
-            </div>
-        </div>
-
-        <!-- AUDIO -->
-        <div class="card" id="card-audio" onclick="openCard('audio')">
-            <div class="card-title">🎧 Extract Audio</div>
-            <div class="card-content" id="content-audio">
-                <input type="text" id="input-audio" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
-            </div>
-        </div>
     </div>
 
     <script>
-        const BOT_TOKEN = "8580096170:AAFQiRDRTdj18TXDO2m3neMP2gJqEWMSjl0";
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -218,7 +93,7 @@
         function openCard(type) {
             if (activeType) return;
             activeType = type;
-            ['music', 'photo', 'video', 'audio'].forEach(t => {
+            ['music', 'photo', 'video'].forEach(t => {
                 if (t !== type) document.getElementById(`card-${t}`).style.display = 'none';
             });
             document.getElementById(`content-${type}`).style.display = 'block';
@@ -226,7 +101,7 @@
         }
 
         function resetMenu() {
-            ['music', 'photo', 'video', 'audio'].forEach(t => {
+            ['music', 'photo', 'video'].forEach(t => {
                 document.getElementById(`card-${t}`).style.display = 'block';
                 document.getElementById(`content-${t}`).style.display = 'none';
                 const input = document.getElementById(`input-${t}`);
@@ -238,159 +113,107 @@
             activeType = null;
         }
 
-        // Поиск Музыкичерез iTunes
-        function searchItunes(type) {
+        function sendQuery(cmd, val) {
+            tg.sendData(`${cmd} ${val}`);
+        }
+
+        // РАЗДЕЛ МУЗЫКИ
+        function handleMusicInput() {
             clearTimeout(searchTimeout);
-            const query = document.getElementById(`input-${type}`).value.trim();
-            const resBox = document.getElementById(`results-${type}`);
-            const status = document.getElementById(`status-${type}`);
+            const val = document.getElementById('input-music').value.trim();
+            const resBox = document.getElementById('results-music');
+            const status = document.getElementById('status-music');
 
-            if (!query) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
+            if (!val) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
 
-            status.innerText = "Ищем...";
+            if (val.includes('spotify.com') || val.startsWith('http://') || val.startsWith('https://')) {
+                resBox.innerHTML = `<button class="btn-action btn-music" onclick="sendQuery('/music', '${val}')">🎧 Скачать аудио по ссылке</button>`;
+                return;
+            }
+
+            status.innerText = "Поиск музыки...";
             status.style.display = 'block';
 
             searchTimeout = setTimeout(() => {
-                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10`)
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(val)}&entity=song&limit=6`)
                     .then(res => res.json())
                     .then(data => {
                         status.style.display = 'none';
                         let html = '';
                         if (data.results && data.results.length > 0) {
                             data.results.forEach(item => {
-                                const title = item.trackName || query;
-                                const artist = item.artistName || 'Artist';
-                                const cover = item.artworkUrl100 || 'https://via.placeholder.com/100';
-                                const fullQuery = `${artist} - ${title}`;
-
+                                const fullQuery = `${item.artistName} - ${item.trackName}`;
                                 html += `
-                                    <div class="track-item" onclick="sendDirectMessage('music', '${escapeQuotes(fullQuery)}')">
-                                        <img class="track-cover" src="${cover}">
+                                    <div class="track-item" onclick="sendQuery('/music', '${escapeQuotes(fullQuery)}')">
+                                        <img class="music-cover" src="${item.artworkUrl100}">
                                         <div class="track-info">
-                                            <div class="track-title">${escapeHtml(title)}</div>
-                                            <div class="track-artist">${escapeHtml(artist)}</div>
+                                            <div class="track-title">${escapeHtml(item.trackName)}</div>
+                                            <div class="track-artist">${escapeHtml(item.artistName)}</div>
                                         </div>
-                                    </div>
-                                `;
+                                    </div>`;
                             });
                         }
-                        html += `<div class="track-item" onclick="sendDirectMessage('music', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
+                        html += `<button class="btn-action btn-music" onclick="sendQuery('/music', '${escapeQuotes(val)}')">🔍 Искать аудио: "${escapeHtml(val)}"</button>`;
                         resBox.innerHTML = html;
-                    })
-                    .catch(() => {
-                        status.style.display = 'none';
-                        resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('music', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
                     });
             }, 300);
         }
 
-        // Поиск Видео с YouTube обложками
-        function searchYoutube(type) {
+        // РАЗДЕЛ ВИДЕО
+        function handleVideoInput() {
             clearTimeout(searchTimeout);
-            const query = document.getElementById(`input-${type}`).value.trim();
-            const resBox = document.getElementById(`results-${type}`);
-            const status = document.getElementById(`status-${type}`);
+            const val = document.getElementById('input-video').value.trim();
+            const resBox = document.getElementById('results-video');
+            const status = document.getElementById('status-video');
 
-            if (!query) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
+            if (!val) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
 
-            status.innerText = "Ищем в YouTube...";
+            if (val.startsWith('http://') || val.startsWith('https://')) {
+                resBox.innerHTML = `<button class="btn-action btn-video" onclick="sendQuery('/video', '${val}')">🎥 Скачать видео по ссылке</button>`;
+                return;
+            }
+
+            status.innerText = "Поиск YouTube видео...";
             status.style.display = 'block';
 
             searchTimeout = setTimeout(() => {
-                fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=videos`)
+                fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(val)}&filter=videos`)
                     .then(res => res.json())
                     .then(data => {
                         status.style.display = 'none';
                         let html = '';
                         if (data.items && data.items.length > 0) {
-                            data.items.slice(0, 8).forEach(item => {
-                                const title = item.title || query;
-                                const uploader = item.uploaderName || 'YouTube';
-                                const cover = item.thumbnail || 'https://via.placeholder.com/100';
-                                const videoUrl = item.url ? `https://www.youtube.com${item.url}` : title;
-
+                            data.items.slice(0, 5).forEach(item => {
+                                const videoUrl = item.url ? `https://www.youtube.com${item.url}` : val;
                                 html += `
-                                    <div class="track-item" onclick="sendDirectMessage('video', '${escapeQuotes(videoUrl)}')">
-                                        <img class="track-cover" src="${cover}">
+                                    <div class="track-item" onclick="sendQuery('/video', '${escapeQuotes(videoUrl)}')">
+                                        <img class="video-cover" src="${item.thumbnail}">
                                         <div class="track-info">
-                                            <div class="track-title">${escapeHtml(title)}</div>
-                                            <div class="track-artist">${escapeHtml(uploader)}</div>
+                                            <div class="track-title">${escapeHtml(item.title)}</div>
+                                            <div class="track-artist">${escapeHtml(item.uploaderName)}</div>
                                         </div>
-                                    </div>
-                                `;
+                                    </div>`;
                             });
                         }
-                        html += `<div class="track-item" onclick="sendDirectMessage('video', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
+                        html += `<button class="btn-action btn-video" onclick="sendQuery('/video', '${escapeQuotes(val)}')">🎬 Искать ролик: "${escapeHtml(val)}"</button>`;
                         resBox.innerHTML = html;
                     })
                     .catch(() => {
                         status.style.display = 'none';
-                        resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('video', '${escapeQuotes(query)}')"><div class="track-title">📥 Скачать: "${escapeHtml(query)}"</div></div>`;
+                        resBox.innerHTML = `<button class="btn-action btn-video" onclick="sendQuery('/video', '${escapeQuotes(val)}')">🎬 Найти и скачать видео: "${escapeHtml(val)}"</button>`;
                     });
             }, 300);
         }
 
         function handleDirectText(type) {
-            const query = document.getElementById(`input-${type}`).value.trim();
-            const resBox = document.getElementById(`results-${type}`);
-            if (!query) { resBox.innerHTML = ''; return; }
-            resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(query)}')"><div class="track-title">🔍 Искать: "${escapeHtml(query)}"</div></div>`;
-        }
-
-        function handleDirectLink(type) {
             const val = document.getElementById(`input-${type}`).value.trim();
-            if (val.startsWith('http://') || val.startsWith('https://')) {
-                sendDirectMessage(type, val);
-            }
+            const resBox = document.getElementById(`results-${type}`);
+            if (!val) { resBox.innerHTML = ''; return; }
+            resBox.innerHTML = `<button class="btn-action btn-photo" onclick="sendQuery('/photo', '${escapeQuotes(val)}')">🖼 Найти фото: "${escapeHtml(val)}"</button>`;
         }
 
-        function sendDirectMessage(type, queryText) {
-            const toast = document.getElementById('toast');
-            toast.innerText = "⏳ Отправка запроса...";
-            toast.style.display = 'block';
-
-            let userChatId = null;
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                userChatId = tg.initDataUnsafe.user.id;
-            }
-
-            if (!userChatId) {
-                alert("Ошибка: Откройте приложение внутри Telegram!");
-                toast.style.display = 'none';
-                return;
-            }
-
-            const commandText = `/${type} ${queryText}`;
-
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: userChatId,
-                    text: commandText
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
-                    toast.innerText = "✅ Запрос отправлен в чат!";
-                    setTimeout(() => { toast.style.display = 'none'; }, 2000);
-                } else {
-                    toast.innerText = "❌ Ошибка Telegram API!";
-                }
-            })
-            .catch(() => {
-                toast.innerText = "❌ Ошибка сети!";
-            });
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-        }
-
-        function escapeQuotes(str) {
-            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
-        }
+        function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+        function escapeQuotes(str) { return str.replace(/'/g, "\\'").replace(/"/g, '\\"'); }
     </script>
 </body>
 </html>
