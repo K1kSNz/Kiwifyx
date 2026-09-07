@@ -36,11 +36,9 @@
         .header {
             width: 100%;
             max-width: 500px;
-            text-align: left;
             font-size: 14px;
             font-weight: bold;
             margin-bottom: 12px;
-            color: var(--text-main);
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
         }
@@ -56,7 +54,6 @@
             font-size: 12px;
             cursor: pointer;
             margin-bottom: 10px;
-            text-align: left;
         }
 
         .container {
@@ -130,7 +127,6 @@
             border-radius: 4px;
             object-fit: cover;
             background: #222;
-            flex-shrink: 0;
         }
 
         .track-info {
@@ -142,7 +138,6 @@
         .track-title {
             font-size: 12px;
             font-weight: bold;
-            color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -159,7 +154,6 @@
             padding: 8px;
             background: var(--card-bg);
             border: 1px solid var(--accent-color);
-            color: var(--text-main);
             font-size: 11px;
             margin-bottom: 10px;
             width: 100%;
@@ -175,7 +169,6 @@
     <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
     <div class="container">
-
         <!-- MUSIC -->
         <div class="card" id="card-music" onclick="openCard('music')">
             <div class="card-title">🎵 Music Search</div>
@@ -212,7 +205,6 @@
                 <input type="text" id="input-audio" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
             </div>
         </div>
-
     </div>
 
     <script>
@@ -310,22 +302,25 @@
             }
         }
 
-        // Прямой запрос к API Telegram (работает гарантированно)
         function sendDirectMessage(type, queryText) {
             const toast = document.getElementById('toast');
             toast.innerText = "⏳ Отправка запроса...";
             toast.style.display = 'block';
 
-            const userChatId = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+            // Полный фоллбэк под ПК и Мобильные
+            let userChatId = null;
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userChatId = tg.initDataUnsafe.user.id;
+            }
 
             if (!userChatId) {
-                alert("Ошибка: Не удалось определить Telegram ID. Откройте приложение внутри Telegram!");
+                alert("Ошибка: Откройте приложение внутри Telegram!");
                 toast.style.display = 'none';
                 return;
             }
 
-            // Бот отправляет служебный текст в чат, а Python скрипт его перехватывает
-            const commandText = `/dl_${type} ${queryText}`;
+            // Прямой вызов понятной команды бота
+            const commandText = `/${type} ${queryText}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
@@ -341,7 +336,7 @@
                     toast.innerText = "✅ Запрос отправлен в чат!";
                     setTimeout(() => { toast.style.display = 'none'; }, 2000);
                 } else {
-                    toast.innerText = "❌ Ошибка отправки!";
+                    toast.innerText = "❌ Ошибка Telegram API!";
                 }
             })
             .catch(() => {
