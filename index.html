@@ -122,8 +122,8 @@
         }
 
         .track-cover {
-            width: 42px;
-            height: 42px;
+            width: 60px;
+            height: 40px;
             border-radius: 4px;
             object-fit: cover;
             background: #222;
@@ -190,9 +190,9 @@
 
         <!-- VIDEO -->
         <div class="card" id="card-video" onclick="openCard('video')">
-            <div class="card-title">🎥 Video Search</div>
+            <div class="card-title">🎥 Video Search (YouTube)</div>
             <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Название или ссылка на видео..." oninput="searchItunes('video')" onclick="event.stopPropagation()">
+                <input type="text" id="input-video" placeholder="Поиск ролика в YouTube..." oninput="searchYoutube('video')" onclick="event.stopPropagation()">
                 <div class="status" id="status-video">Поиск...</div>
                 <div class="results-list" id="results-video"></div>
             </div>
@@ -238,24 +238,20 @@
             activeType = null;
         }
 
+        // Поиск Музыкичерез iTunes
         function searchItunes(type) {
             clearTimeout(searchTimeout);
             const query = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
             const status = document.getElementById(`status-${type}`);
 
-            if (!query) {
-                resBox.innerHTML = '';
-                status.style.display = 'none';
-                return;
-            }
+            if (!query) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
 
             status.innerText = "Ищем...";
             status.style.display = 'block';
 
             searchTimeout = setTimeout(() => {
-                const entity = type === 'video' ? 'musicVideo' : 'song';
-                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=${entity}&limit=10`)
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=10`)
                     .then(res => res.json())
                     .then(data => {
                         status.style.display = 'none';
@@ -268,7 +264,7 @@
                                 const fullQuery = `${artist} - ${title}`;
 
                                 html += `
-                                    <div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(fullQuery)}')">
+                                    <div class="track-item" onclick="sendDirectMessage('music', '${escapeQuotes(fullQuery)}')">
                                         <img class="track-cover" src="${cover}">
                                         <div class="track-info">
                                             <div class="track-title">${escapeHtml(title)}</div>
@@ -278,12 +274,58 @@
                                 `;
                             });
                         }
-                        html += `<div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
+                        html += `<div class="track-item" onclick="sendDirectMessage('music', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
                         resBox.innerHTML = html;
                     })
                     .catch(() => {
                         status.style.display = 'none';
-                        resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
+                        resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('music', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
+                    });
+            }, 300);
+        }
+
+        // Поиск Видео с YouTube обложками
+        function searchYoutube(type) {
+            clearTimeout(searchTimeout);
+            const query = document.getElementById(`input-${type}`).value.trim();
+            const resBox = document.getElementById(`results-${type}`);
+            const status = document.getElementById(`status-${type}`);
+
+            if (!query) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
+
+            status.innerText = "Ищем в YouTube...";
+            status.style.display = 'block';
+
+            searchTimeout = setTimeout(() => {
+                fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=videos`)
+                    .then(res => res.json())
+                    .then(data => {
+                        status.style.display = 'none';
+                        let html = '';
+                        if (data.items && data.items.length > 0) {
+                            data.items.slice(0, 8).forEach(item => {
+                                const title = item.title || query;
+                                const uploader = item.uploaderName || 'YouTube';
+                                const cover = item.thumbnail || 'https://via.placeholder.com/100';
+                                const videoUrl = item.url ? `https://www.youtube.com${item.url}` : title;
+
+                                html += `
+                                    <div class="track-item" onclick="sendDirectMessage('video', '${escapeQuotes(videoUrl)}')">
+                                        <img class="track-cover" src="${cover}">
+                                        <div class="track-info">
+                                            <div class="track-title">${escapeHtml(title)}</div>
+                                            <div class="track-artist">${escapeHtml(uploader)}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
+                        html += `<div class="track-item" onclick="sendDirectMessage('video', '${escapeQuotes(query)}')"><div class="track-title">📥 Запросить: "${escapeHtml(query)}"</div></div>`;
+                        resBox.innerHTML = html;
+                    })
+                    .catch(() => {
+                        status.style.display = 'none';
+                        resBox.innerHTML = `<div class="track-item" onclick="sendDirectMessage('video', '${escapeQuotes(query)}')"><div class="track-title">📥 Скачать: "${escapeHtml(query)}"</div></div>`;
                     });
             }, 300);
         }
@@ -307,7 +349,6 @@
             toast.innerText = "⏳ Отправка запроса...";
             toast.style.display = 'block';
 
-            // Полный фоллбэк под ПК и Мобильные
             let userChatId = null;
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 userChatId = tg.initDataUnsafe.user.id;
@@ -319,7 +360,6 @@
                 return;
             }
 
-            // Прямой вызов понятной команды бота
             const commandText = `/${type} ${queryText}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
