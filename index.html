@@ -7,11 +7,14 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --card-bg: #151c2c;
-            --accent-color: #2563eb;
-            --text-color: #ffffff;
-            --border-color: #2a3447;
+            --bg-color: #1e1e24;
+            --card-bg: #2b2b36;
+            --input-bg: #18181c;
+            --accent-color: #4a4e69;
+            --btn-green: #2a9d8f;
+            --text-main: #f1f1f1;
+            --text-sub: #a0a0ab;
+            --border-color: #3f3f4e;
         }
 
         * {
@@ -19,13 +22,13 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            border-radius: 0 !important; /* Убираем скругления */
+            border-radius: 0 !important;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 16px;
+            color: var(--text-main);
+            padding: 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -33,37 +36,38 @@
 
         .header {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             letter-spacing: 1px;
-            margin-bottom: 20px;
-            color: #94a3b8;
+            margin-bottom: 16px;
+            color: var(--text-sub);
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         .back-btn {
             display: none;
             width: 100%;
-            max-width: 400px;
-            background: transparent;
-            color: #94a3b8;
+            max-width: 420px;
+            background: var(--card-bg);
+            color: var(--text-main);
             border: 1px solid var(--border-color);
-            padding: 8px;
+            padding: 10px;
             font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 15px;
-            text-align: left;
+            margin-bottom: 12px;
+            text-transform: uppercase;
         }
 
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .card {
@@ -71,7 +75,6 @@
             border: 1px solid var(--border-color);
             padding: 12px;
             cursor: pointer;
-            transition: border-color 0.2s;
         }
 
         .card-header {
@@ -80,69 +83,74 @@
             gap: 12px;
         }
 
-        .card-img {
-            width: 45px;
-            height: 45px;
-            object-fit: cover;
-            background: #1e293b;
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-box svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-main);
         }
 
         .card-title {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .card-content {
             display: none;
-            margin-top: 15px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 8px;
+            margin-top: 12px;
         }
 
         input {
-            flex: 1;
-            background: #0f172a;
+            width: 100%;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
-            padding: 10px;
-            color: #fff;
+            padding: 10px 12px;
+            color: var(--text-main);
             font-size: 13px;
             outline: none;
         }
 
         input:focus {
-            border-color: var(--accent-color);
+            border-color: var(--text-sub);
         }
 
-        button.action-btn {
-            background: var(--accent-color);
-            color: #fff;
-            border: none;
-            padding: 10px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
+        /* Листаемый список вариантов */
         .results-list {
-            margin-top: 12px;
+            margin-top: 10px;
+            max-height: 280px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
+            padding-right: 2px;
+        }
+
+        .results-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .results-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
         }
 
         .result-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #0f172a;
+            background: var(--input-bg);
             border: 1px solid var(--border-color);
             padding: 8px;
+            gap: 10px;
         }
 
         .result-info {
@@ -152,28 +160,72 @@
             overflow: hidden;
         }
 
-        .result-img {
-            width: 35px;
-            height: 35px;
-            object-fit: cover;
-            background: #1e293b;
+        .result-text-block {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .result-text {
+        .result-title {
             font-size: 12px;
+            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 200px;
+            max-width: 210px;
+            color: var(--text-main);
+        }
+
+        .result-author {
+            font-size: 10px;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 210px;
         }
 
         .download-btn {
-            background: #10b981;
+            background: var(--btn-green);
             color: #fff;
             border: none;
-            padding: 6px 10px;
+            padding: 8px 12px;
             font-size: 11px;
+            font-weight: 700;
             cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* Индикатор загрузки */
+        .loader-box {
+            display: none;
+            margin-top: 10px;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            margin-top: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            width: 30%;
+            height: 100%;
+            background: var(--btn-green);
+            position: absolute;
+            animation: loadingAnim 1.2s infinite ease-in-out;
+        }
+
+        @keyframes loadingAnim {
+            0% { left: -30%; }
+            100% { left: 100%; }
         }
     </style>
 </head>
@@ -183,65 +235,74 @@
 
     <button class="back-btn" id="backBtn" onclick="resetMenu()">← НАЗАД К МЕНЮ</button>
 
-    <div class="container" id="cardsContainer">
+    <div class="container">
         
-        <!-- Карточка 1: Музыка -->
+        <!-- 1. МУЗЫКА -->
         <div class="card" id="card-music" onclick="openCard('music')">
             <div class="card-header">
-                <!-- Замените src на свою картинку -->
-                <img src="https://via.placeholder.com/45/2563eb/ffffff?text=MUSIC" class="card-img" alt="img">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                </div>
                 <div class="card-title">🎵 Поиск музыки</div>
             </div>
             <div class="card-content" id="content-music">
-                <div class="input-group">
-                    <input type="text" id="input-music" placeholder="Введите название..." onclick="event.stopPropagation()">
-                    <button class="action-btn" onclick="searchMusic(event)">ИСКАТЬ</button>
+                <input type="text" id="input-music" placeholder="Введите название или автора..." oninput="liveSearchMusic()" onclick="event.stopPropagation()">
+                <div class="loader-box" id="loader-music">
+                    <span style="font-size: 11px; color: var(--text-sub);">Отправка запроса боту...</span>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
                 </div>
                 <div class="results-list" id="results-music"></div>
             </div>
         </div>
 
-        <!-- Карточка 2: Pinterest -->
-        <div class="card" id="card-pinterest" onclick="openCard('pinterest')">
+        <!-- 2. PHOTO -->
+        <div class="card" id="card-photo" onclick="openCard('photo')">
             <div class="card-header">
-                <!-- Замените src на свою картинку -->
-                <img src="https://via.placeholder.com/45/e11d48/ffffff?text=PIN" class="card-img" alt="img">
-                <div class="card-title">📌 Pinterest фото</div>
-            </div>
-            <div class="card-content" id="content-pinterest">
-                <div class="input-group">
-                    <input type="text" id="input-pinterest" placeholder="Эстетический запрос..." onclick="event.stopPropagation()">
-                    <button class="action-btn" onclick="sendDirect('pinterest', 'input-pinterest', event)">НАЙТИ</button>
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                 </div>
+                <div class="card-title">📸 Поиск Photo</div>
+            </div>
+            <div class="card-content" id="content-photo">
+                <input type="text" id="input-photo" placeholder="Поиск изображений..." oninput="liveSearchPhoto()" onclick="event.stopPropagation()">
+                <div class="loader-box" id="loader-photo">
+                    <span style="font-size: 11px; color: var(--text-sub);">Поиск картинок...</span>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                </div>
+                <div class="results-list" id="results-photo"></div>
             </div>
         </div>
 
-        <!-- Карточка 3: Видео -->
+        <!-- 3. ВИДЕО -->
         <div class="card" id="card-video" onclick="openCard('video')">
             <div class="card-header">
-                <!-- Замените src на свою картинку -->
-                <img src="https://via.placeholder.com/45/0284c7/ffffff?text=VIDEO" class="card-img" alt="img">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                </div>
                 <div class="card-title">🎬 Скачать видео</div>
             </div>
             <div class="card-content" id="content-video">
-                <div class="input-group">
-                    <input type="text" id="input-video" placeholder="Ссылка на видео..." onclick="event.stopPropagation()">
-                    <button class="action-btn" onclick="sendDirect('video', 'input-video', event)">СКАЧАТЬ</button>
+                <input type="text" id="input-video" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('video')" onclick="event.stopPropagation()">
+                <div class="loader-box" id="loader-video">
+                    <span style="font-size: 11px; color: var(--text-sub);">Скачивание видео...</span>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
                 </div>
             </div>
         </div>
 
-        <!-- Карточка 4: Аудио -->
+        <!-- 4. АУДИО -->
         <div class="card" id="card-audio" onclick="openCard('audio')">
             <div class="card-header">
-                <!-- Замените src на свою картинку -->
-                <img src="https://via.placeholder.com/45/d97706/ffffff?text=AUDIO" class="card-img" alt="img">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24"><path d="M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/></svg>
+                </div>
                 <div class="card-title">🎧 Вырезать аудио</div>
             </div>
             <div class="card-content" id="content-audio">
-                <div class="input-group">
-                    <input type="text" id="input-audio" placeholder="Ссылка на видео..." onclick="event.stopPropagation()">
-                    <button class="action-btn" onclick="sendDirect('audio', 'input-audio', event)">ИЗВЛЕЧЬ</button>
+                <input type="text" id="input-audio" placeholder="Вставьте ссылку для извлечения звука..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
+                <div class="loader-box" id="loader-audio">
+                    <span style="font-size: 11px; color: var(--text-sub);">Извлечение аудио...</span>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
                 </div>
             </div>
         </div>
@@ -252,88 +313,136 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let activeCardId = null;
+        let activeType = null;
+        let searchTimeout = null;
 
         function openCard(type) {
-            if (activeCardId) return;
-
-            activeCardId = type;
-            const cards = ['music', 'pinterest', 'video', 'audio'];
-
-            cards.forEach(c => {
-                if (c !== type) {
-                    document.getElementById(`card-${c}`).style.display = 'none';
-                }
+            if (activeType) return;
+            activeType = type;
+            ['music', 'photo', 'video', 'audio'].forEach(t => {
+                if (t !== type) document.getElementById(`card-${t}`).style.display = 'none';
             });
-
-            const activeCard = document.getElementById(`card-${type}`);
-            const content = document.getElementById(`content-${type}`);
-
-            content.style.display = 'block';
+            document.getElementById(`content-${type}`).style.display = 'block';
             document.getElementById('backBtn').style.display = 'block';
         }
 
         function resetMenu() {
-            const cards = ['music', 'pinterest', 'video', 'audio'];
-            cards.forEach(c => {
-                document.getElementById(`card-${c}`).style.display = 'block';
-                document.getElementById(`content-${c}`).style.display = 'none';
+            ['music', 'photo', 'video', 'audio'].forEach(t => {
+                document.getElementById(`card-${t}`).style.display = 'block';
+                document.getElementById(`content-${t}`).style.display = 'none';
+                const input = document.getElementById(`input-${t}`);
+                if (input) input.value = '';
+                const res = document.getElementById(`results-${t}`);
+                if (res) res.innerHTML = '';
+                const loader = document.getElementById(`loader-${t}`);
+                if (loader) loader.style.display = 'none';
             });
-
             document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('results-music').innerHTML = '';
-            activeCardId = null;
+            activeType = null;
         }
 
-        // Поиск музыки (показывает 3 похожих результата с картинками)
-        function searchMusic(event) {
-            event.stopPropagation();
-            const query = document.getElementById('input-music').value.trim();
-            if (!query) return;
+        // Поиск музыки в реальном времени
+        function liveSearchMusic() {
+            clearTimeout(searchTimeout);
+            const val = document.getElementById('input-music').value.trim();
+            const resBox = document.getElementById('results-music');
+            
+            if (!val) { resBox.innerHTML = ''; return; }
 
-            const resultsContainer = document.getElementById('results-music');
-            resultsContainer.innerHTML = '<div style="font-size: 12px; color: #94a3b8;">Поиск...</div>';
+            searchTimeout = setTimeout(() => {
+                // Генерация гибких вариантов
+                const mockList = [
+                    { title: `${val}`, author: "Оригинальный трек" },
+                    { title: `${val} (Remix)`, author: "DJ Edition / Club Mix" },
+                    { title: `${val} (Speed Up)`, author: "Nightcore Version" },
+                    { title: `${val} (Slowed + Reverb)`, author: "Lo-Fi Atmosphere" },
+                    { title: `${val} (Acoustic)`, author: "Live Acoustic" },
+                    { title: `${val} (Instrumental)`, author: "No Vocal Mix" },
+                    { title: `${val} (Extended Mix)`, author: "Full Length" }
+                ];
 
-            // Имитация вариантов с превью (при отправке передаст текст боту)
-            setTimeout(() => {
-                resultsContainer.innerHTML = `
-                    <div class="result-item">
-                        <div class="result-info">
-                            <img src="https://via.placeholder.com/35/2563eb/ffffff?text=1" class="result-img">
-                            <div class="result-text">${query} (Original Mix)</div>
+                let html = '';
+                mockList.forEach((item) => {
+                    html += `
+                        <div class="result-item">
+                            <div class="result-info">
+                                <div class="icon-box" style="width:30px; height:30px;">
+                                    <svg viewBox="0 0 24 24" style="width:14px; height:14px;"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                                </div>
+                                <div class="result-text-block">
+                                    <div class="result-title">${item.title}</div>
+                                    <div class="result-author">👤 ${item.author}</div>
+                                </div>
+                            </div>
+                            <button class="download-btn" onclick="sendToBot('music', '${item.title}')">СКАЧАТЬ</button>
                         </div>
-                        <button class="download-btn" onclick="sendToBot('music', '${query}', event)">СКАЧАТЬ</button>
-                    </div>
-                    <div class="result-item">
-                        <div class="result-info">
-                            <img src="https://via.placeholder.com/35/2563eb/ffffff?text=2" class="result-img">
-                            <div class="result-text">${query} (Remix)</div>
-                        </div>
-                        <button class="download-btn" onclick="sendToBot('music', '${query} remix', event)">СКАЧАТЬ</button>
-                    </div>
-                    <div class="result-item">
-                        <div class="result-info">
-                            <img src="https://via.placeholder.com/35/2563eb/ffffff?text=3" class="result-img">
-                            <div class="result-text">${query} (Speed Up)</div>
-                        </div>
-                        <button class="download-btn" onclick="sendToBot('music', '${query} speed up', event)">СКАЧАТЬ</button>
-                    </div>
-                `;
-            }, 400);
+                    `;
+                });
+                resBox.innerHTML = html;
+            }, 300);
         }
 
-        function sendDirect(type, inputId, event) {
-            event.stopPropagation();
-            const val = document.getElementById(inputId).value.trim();
-            if (!val) return;
-            sendToBot(type, val, event);
+        // Поиск Photo в реальном времени
+        function liveSearchPhoto() {
+            clearTimeout(searchTimeout);
+            const val = document.getElementById('input-photo').value.trim();
+            const resBox = document.getElementById('results-photo');
+
+            if (!val) { resBox.innerHTML = ''; return; }
+
+            searchTimeout = setTimeout(() => {
+                const photoOptions = [
+                    { title: `${val} HD`, author: "Aesthetic Collection" },
+                    { title: `${val} Minimalist`, author: "Pinterest Style" },
+                    { title: `${val} Wallpaper`, author: "4K Art Background" },
+                    { title: `${val} Dark Tone`, author: "Atmospheric" },
+                    { title: `${val} Vintage`, author: "Retro Aesthetic" }
+                ];
+
+                let html = '';
+                photoOptions.forEach((item) => {
+                    html += `
+                        <div class="result-item">
+                            <div class="result-info">
+                                <div class="icon-box" style="width:30px; height:30px;">
+                                    <svg viewBox="0 0 24 24" style="width:14px; height:14px;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                                </div>
+                                <div class="result-text-block">
+                                    <div class="result-title">${item.title}</div>
+                                    <div class="result-author">📌 ${item.author}</div>
+                                </div>
+                            </div>
+                            <button class="download-btn" onclick="sendToBot('photo', '${item.title}')">ПОЛУЧИТЬ</button>
+                        </div>
+                    `;
+                });
+                resBox.innerHTML = html;
+            }, 300);
         }
 
-        // Отправка данных боту в сообщения
-        function sendToBot(type, queryText, event) {
-            event.stopPropagation();
-            tg.sendData(JSON.stringify({ type: type, query: queryText }));
-            tg.close();
+        // Авто-обработка прямых ссылок для Видео и Аудио
+        function handleDirectLink(type) {
+            clearTimeout(searchTimeout);
+            const val = document.getElementById(`input-${type}`).value.trim();
+            if (val.startsWith('http://') || val.startsWith('https://')) {
+                searchTimeout = setTimeout(() => {
+                    sendToBot(type, val);
+                }, 500);
+            }
+        }
+
+        // Безопасная отправка в Telegram
+        function sendToBot(type, queryText) {
+            const loader = document.getElementById(`loader-${type}`);
+            if (loader) loader.style.display = 'block';
+
+            try {
+                tg.sendData(JSON.stringify({ type: type, query: queryText }));
+                setTimeout(() => { tg.close(); }, 600);
+            } catch (e) {
+                alert("Ошибка: Запустите Web App внутри Telegram!");
+                if (loader) loader.style.display = 'none';
+            }
         }
     </script>
 </body>
