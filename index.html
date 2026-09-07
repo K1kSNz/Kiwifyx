@@ -108,7 +108,7 @@
 
         .results-list {
             margin-top: 8px;
-            max-height: 350px;
+            max-height: 380px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -124,7 +124,6 @@
             padding: 6px 8px;
             cursor: pointer;
             gap: 10px;
-            position: relative;
         }
 
         .track-item:hover {
@@ -170,43 +169,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        /* CSS Анимация скачивания */
-        .loading-bar {
-            display: none;
-            width: 100%;
-            height: 3px;
-            background-color: var(--border-color);
-            position: relative;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .loading-bar::after {
-            content: '';
-            position: absolute;
-            left: -40%;
-            width: 40%;
-            height: 100%;
-            background-color: var(--accent-color);
-            animation: loading 1.2s infinite linear;
-        }
-
-        @keyframes loading {
-            0% { left: -40%; }
-            100% { left: 100%; }
-        }
-
-        .toast-notify {
-            display: none;
-            padding: 8px;
-            background: var(--card-bg);
-            border: 1px solid var(--accent-color);
-            color: var(--text-main);
-            font-size: 11px;
-            margin-top: 8px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -216,8 +178,6 @@
     <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
     <div class="container">
-        <div class="toast-notify" id="toast">⏳ Отправка команды боту... Файл появится в чате!</div>
-        <div class="loading-bar" id="loader"></div>
 
         <!-- MUSIC -->
         <div class="card" id="card-music" onclick="openCard('music')">
@@ -367,38 +327,12 @@
             }
         }
 
-        // Отправка без закрытия WebApp с показом анимации
+        // Мгновенная передача выбранного трека в бот
         function sendToBot(type, queryText) {
-            const loader = document.getElementById('loader');
-            const toast = document.getElementById('toast');
-            
-            loader.style.display = 'block';
-            toast.style.display = 'block';
-
-            const userChatId = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
-
-            if (userChatId) {
-                // Прямой фоновый запрос на бота
-                fetch('http://localhost:8080/api/download', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: userChatId,
-                        type: type,
-                        query: queryText
-                    })
-                }).then(() => {
-                    setTimeout(() => {
-                        loader.style.display = 'none';
-                        toast.innerText = "✅ Запрос отправлен! Файл загружается в чат.";
-                        setTimeout(() => { toast.style.display = 'none'; }, 2500);
-                    }, 1000);
-                }).catch(() => {
-                    // Резервный вариант, если локальный сервер недоступен
-                    tg.sendData(JSON.stringify({ type: type, query: queryText }));
-                });
-            } else {
+            try {
                 tg.sendData(JSON.stringify({ type: type, query: queryText }));
+            } catch (e) {
+                alert("Ошибка взаимодействия с Telegram.");
             }
         }
 
