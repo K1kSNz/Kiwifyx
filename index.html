@@ -39,7 +39,6 @@
             text-align: left;
             font-size: 14px;
             font-weight: bold;
-            letter-spacing: 0.5px;
             margin-bottom: 12px;
             color: var(--text-main);
             border-bottom: 1px solid var(--border-color);
@@ -60,10 +59,6 @@
             text-align: left;
         }
 
-        .back-btn:hover {
-            background: var(--hover-bg);
-        }
-
         .container {
             width: 100%;
             max-width: 500px;
@@ -77,10 +72,6 @@
             border: 1px solid var(--border-color);
             padding: 10px;
             cursor: pointer;
-        }
-
-        .card:hover {
-            background: var(--hover-bg);
         }
 
         .card-title {
@@ -104,10 +95,6 @@
             outline: none;
         }
 
-        input:focus {
-            border-color: #555;
-        }
-
         .results-list {
             margin-top: 8px;
             max-height: 380px;
@@ -115,13 +102,6 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-        }
-
-        .results-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .results-list::-webkit-scrollbar-thumb {
-            background: var(--border-color);
         }
 
         .track-item {
@@ -136,7 +116,7 @@
         }
 
         .track-item:hover {
-            background: var(--card-bg);
+            background: var(--hover-bg);
         }
 
         .track-left {
@@ -170,11 +150,6 @@
             text-overflow: ellipsis;
         }
 
-        .track-title .date-tag {
-            color: var(--accent-color);
-            font-weight: normal;
-        }
-
         .track-artist {
             font-size: 11px;
             color: var(--text-sub);
@@ -204,7 +179,7 @@
         <div class="card" id="card-music" onclick="openCard('music')">
             <div class="card-title">Music Search</div>
             <div class="card-content" id="content-music">
-                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="searchMusic()" onclick="event.stopPropagation()">
+                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="searchITunes('music')" onclick="event.stopPropagation()">
                 <div class="status-text" id="status-music">Searching...</div>
                 <div class="results-list" id="results-music"></div>
             </div>
@@ -214,7 +189,7 @@
         <div class="card" id="card-photo" onclick="openCard('photo')">
             <div class="card-title">Photo Search</div>
             <div class="card-content" id="content-photo">
-                <input type="text" id="input-photo" placeholder="Search image..." oninput="searchPhoto()" onclick="event.stopPropagation()">
+                <input type="text" id="input-photo" placeholder="Search image title..." oninput="searchPhoto()" onclick="event.stopPropagation()">
                 <div class="status-text" id="status-photo">Searching...</div>
                 <div class="results-list" id="results-photo"></div>
             </div>
@@ -222,10 +197,11 @@
 
         <!-- VIDEO -->
         <div class="card" id="card-video" onclick="openCard('video')">
-            <div class="card-title">Video Download</div>
+            <div class="card-title">Video Search & Download</div>
             <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Paste link..." oninput="handleDirectLink('video')" onclick="event.stopPropagation()">
-                <div class="status-text" id="status-video">Processing link...</div>
+                <input type="text" id="input-video" placeholder="Video name or link..." oninput="searchITunes('video')" onclick="event.stopPropagation()">
+                <div class="status-text" id="status-video">Searching...</div>
+                <div class="results-list" id="results-video"></div>
             </div>
         </div>
 
@@ -233,8 +209,8 @@
         <div class="card" id="card-audio" onclick="openCard('audio')">
             <div class="card-title">Audio Extract</div>
             <div class="card-content" id="content-audio">
-                <input type="text" id="input-audio" placeholder="Paste link..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
-                <div class="status-text" id="status-audio">Processing link...</div>
+                <input type="text" id="input-audio" placeholder="Paste video link..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
+                <div class="status-text" id="status-audio">Processing...</div>
             </div>
         </div>
 
@@ -272,41 +248,47 @@
             activeType = null;
         }
 
-        // Поиск музыки через открытый API Deezer с настоящими обложками
-        function searchMusic() {
+        // Рабочий поиск через iTunes API без блокировок CORS
+        function searchITunes(type) {
             clearTimeout(searchTimeout);
-            const query = document.getElementById('input-music').value.trim();
-            const resBox = document.getElementById('results-music');
-            const status = document.getElementById('status-music');
+            const inputVal = document.getElementById(`input-${type}`).value.trim();
+            const resBox = document.getElementById(`results-${type}`);
+            const status = document.getElementById(`status-${type}`);
 
-            if (!query) {
+            if (!inputVal) {
                 resBox.innerHTML = '';
                 status.style.display = 'none';
                 return;
             }
 
+            if (inputVal.startsWith('http://') || inputVal.startsWith('https://')) {
+                sendToBot(type, inputVal);
+                return;
+            }
+
+            status.innerText = "Searching...";
             status.style.display = 'block';
 
             searchTimeout = setTimeout(() => {
-                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.deezer.com/search?q=' + query)}`)
-                    .then(response => response.json())
+                const entity = type === 'video' ? 'musicVideo' : 'song';
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(inputVal)}&entity=${entity}&limit=15`)
+                    .then(res => res.json())
                     .then(data => {
                         status.style.display = 'none';
-                        const parsed = JSON.parse(data.contents);
-                        if (!parsed.data || parsed.data.length === 0) {
+                        if (!data.results || data.results.length === 0) {
                             resBox.innerHTML = '<div class="track-artist" style="padding:8px;">No results found</div>';
                             return;
                         }
 
                         let html = '';
-                        parsed.data.slice(0, 15).forEach(item => {
-                            const cover = item.album.cover_medium || item.album.cover_small;
-                            const title = item.title;
-                            const artist = item.artist.name;
-                            const fullQuery = `${artist} - ${title}`;
+                        data.results.forEach(item => {
+                            const cover = item.artworkUrl100 || 'https://via.placeholder.com/100';
+                            const title = item.trackName || 'Unknown';
+                            const artist = item.artistName || 'Unknown Artist';
+                            const query = `${artist} - ${title}`;
 
                             html += `
-                                <div class="track-item" onclick="sendToBot('music', '${escapeQuotes(fullQuery)}')">
+                                <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')">
                                     <div class="track-left">
                                         <img class="track-cover" src="${cover}" alt="cover">
                                         <div class="track-info">
@@ -320,12 +302,11 @@
                         resBox.innerHTML = html;
                     })
                     .catch(() => {
-                        status.style.display = 'none';
+                        status.innerText = "Search error. Click to send directly.";
                     });
-            }, 400);
+            }, 300);
         }
 
-        // Поиск картинок
         function searchPhoto() {
             clearTimeout(searchTimeout);
             const query = document.getElementById('input-photo').value.trim();
@@ -339,20 +320,18 @@
             }
 
             status.style.display = 'block';
-
             searchTimeout = setTimeout(() => {
                 status.style.display = 'none';
                 let html = '';
-                for (let i = 1; i <= 6; i++) {
+                for (let i = 1; i <= 5; i++) {
                     const imgUrl = `https://picsum.photos/seed/${encodeURIComponent(query + i)}/200/200`;
-                    const itemTitle = `${query} · Option ${i}`;
                     html += `
                         <div class="track-item" onclick="sendToBot('photo', '${escapeQuotes(query)}')">
                             <div class="track-left">
                                 <img class="track-cover" src="${imgUrl}" alt="photo">
                                 <div class="track-info">
-                                    <div class="track-title">${escapeHtml(itemTitle)}</div>
-                                    <div class="track-artist">Collection</div>
+                                    <div class="track-title">${escapeHtml(query)}</div>
+                                    <div class="track-artist">Result #${i}</div>
                                 </div>
                             </div>
                         </div>
@@ -373,15 +352,9 @@
         }
 
         function sendToBot(type, queryText) {
-            const status = document.getElementById(`status-${type}`);
-            if (status) {
-                status.innerText = "Sending request to Telegram...";
-                status.style.display = 'block';
-            }
-
             try {
                 tg.sendData(JSON.stringify({ type: type, query: queryText }));
-                setTimeout(() => { tg.close(); }, 300);
+                setTimeout(() => { tg.close(); }, 200);
             } catch (e) {
                 alert("Please launch inside Telegram bot");
             }
