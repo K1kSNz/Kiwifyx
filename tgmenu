@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiwifyx Hub</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #0f172a);
+            --card-bg: var(--tg-theme-secondary-bg-color, #1e293b);
+            --text-color: var(--tg-theme-text-color, #f8fafc);
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.6;
+            margin: 0;
+        }
+
+        .grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: transform 0.15s ease;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Kiwifyx Mini App</h1>
+        <p>Минималистичный медиа-помощник</p>
+    </div>
+
+    <div class="grid">
+        <!-- Поиск музыки -->
+        <div class="card">
+            <div class="card-title">🎵 Поиск музыки</div>
+            <div class="input-group">
+                <input type="text" id="musicInput" placeholder="Название или исполнитель...">
+                <button onclick="sendAction('music')">Искать</button>
+            </div>
+        </div>
+
+        <!-- Поиск Pinterest -->
+        <div class="card">
+            <div class="card-title">📌 Pinterest фото</div>
+            <div class="input-group">
+                <input type="text" id="pinterestInput" placeholder="Эстетический запрос...">
+                <button onclick="sendAction('pinterest')">Найти</button>
+            </div>
+        </div>
+
+        <!-- Скачивание видео -->
+        <div class="card">
+            <div class="card-title">🎬 Скачать видео</div>
+            <div class="input-group">
+                <input type="text" id="videoInput" placeholder="Ссылка на видео...">
+                <button onclick="sendAction('video')">Скачать</button>
+            </div>
+        </div>
+
+        <!-- Аудио из видео -->
+        <div class="card">
+            <div class="card-title">🎧 Вырезать аудио</div>
+            <div class="input-group">
+                <input type="text" id="audioInput" placeholder="Ссылка на видео...">
+                <button onclick="sendAction('audio')">Извлечь</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачивает веб-приложение на весь экран
+
+        function sendAction(type) {
+            let value = "";
+            if (type === 'music') value = document.getElementById('musicInput').value;
+            if (type === 'pinterest') value = document.getElementById('pinterestInput').value;
+            if (type === 'video') value = document.getElementById('videoInput').value;
+            if (type === 'audio') value = document.getElementById('audioInput').value;
+
+            if (!value.trim()) return;
+
+            // Отправляем данные обратно боту в Telegram
+            tg.sendData(JSON.stringify({ type: type, query: value }));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
