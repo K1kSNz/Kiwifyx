@@ -64,9 +64,6 @@
         tg.ready();
         tg.expand();
 
-        // УКАЖИ СВОЙ ЮЗЕРНЕЙМ БОТА БЕЗ СОБАЧКИ (например: kiwifyx_bot)
-        const BOT_USERNAME = "8580096170"; // Либо замени на юзернейм, если он есть, но токен тоже сработает через открывашку, лучше юзернейм вида my_bot_name
-
         let searchTimeout = null;
 
         function openTab(tabName, element) {
@@ -87,7 +84,7 @@
 
             if (query.startsWith('http://') || query.startsWith('https://')) {
                 document.getElementById('music-results').innerHTML = `
-                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="executeRedirect('audio', '${encodeURIComponent(query)}', 'best')">
+                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="sendMusicRequest('${escapeQuotes(query)}')">
                         🎧 Скачать по ссылке
                     </button>`;
                 return;
@@ -116,10 +113,8 @@
 
                 container.innerHTML = data.data.map(track => {
                     const fullTitle = `${track.artist.name} - ${track.title}`;
-                    const safeTitle = encodeURIComponent(fullTitle);
-
                     return `
-                        <div class="track-item" onclick="executeRedirect('audio', '${safeTitle}', 'best')">
+                        <div class="track-item" onclick="sendMusicRequest('${escapeQuotes(fullTitle)}')">
                             <img class="track-cover" src="${track.album.cover_medium}" alt="cover">
                             <div class="track-info">
                                 <div class="track-title">${escapeHtml(track.title)}</div>
@@ -140,23 +135,21 @@
             if (!url) return alert('Введите ссылку!');
             
             const mode = quality === 'audio' ? 'audio' : 'video';
-            executeRedirect(mode, encodeURIComponent(url), quality);
+            tg.sendData(`${mode}|||${url}|||${quality}`);
+            tg.close();
         }
 
-        function executeRedirect(mode, payload, quality) {
-            // Костыль через открытие ссылки бота, который передает данные прямо в параметр start
-            const dataString = btoa(encodeURIComponent(`${mode}|||${payload}|||${quality}`));
-            // Закрываем приложение и перенаправляем в чат с ботом через deep link параметр
-            window.location.href = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/')}`; // или используем tg.openTelegramLink
-            
-            // Надежный метод закрытия с передачей через открытие ссылки бота
-            // Создаем спец ссылку на бота с параметром
-            tg.openLink(`https://t.me/KiwifyxBot?start=${dataString}`);
+        function sendMusicRequest(query) {
+            tg.sendData(`audio|||${query}|||best`);
             tg.close();
         }
 
         function escapeHtml(str) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
     </script>
 </body>
