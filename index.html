@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiwifyx</title>
+    <title>Kiwifyx Control Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -14,31 +14,38 @@
             --border-color: #2a2a2a;
             --text-main: #e1e1e1;
             --text-sub: #888888;
+            --btn-grey: #242424;
+            --btn-grey-hover: #333333;
             --accent-green: #1db954;
-            --accent-red: #e50914;
             --accent-blue: #0088cc;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Consolas, monospace; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        
         .header { width: 100%; max-width: 500px; font-size: 14px; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-        .back-btn { display: none; width: 100%; max-width: 500px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px; font-size: 12px; cursor: pointer; margin-bottom: 10px; }
-        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 6px; }
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 10px; cursor: pointer; }
+        .back-btn { display: none; width: 100%; max-width: 500px; background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px; font-size: 12px; cursor: pointer; margin-bottom: 10px; text-align: left; }
+        
+        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 8px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px; cursor: pointer; border-radius: 4px; }
         .card-title { font-size: 13px; font-weight: bold; }
         .card-content { display: none; margin-top: 10px; }
-        input { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; color: var(--text-main); font-size: 12px; outline: none; }
         
-        /* Сетка красивых кнопок для видео */
-        .btn-grid { margin-top: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-        .btn-action { width: 100%; border: none; color: white; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; }
-        .btn-music { background: var(--accent-green); }
-        .btn-video { background: var(--accent-red); }
-        .btn-audio { background: #333; border: 1px solid #555; }
-        .btn-photo { background: var(--accent-blue); }
+        input { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 10px; color: var(--text-main); font-size: 12px; outline: none; border-radius: 4px; }
+        
+        /* Сетка серых отдельных кнопок */
+        .btn-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .btn-action { width: 100%; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; text-align: center; }
+        
+        /* Серые кнопки выбора */
+        .btn-grey-quality { background: var(--btn-grey); }
+        .btn-grey-quality:hover { background: var(--btn-grey-hover); }
 
-        .results-list { margin-top: 8px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-        .track-item { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; cursor: pointer; gap: 10px; }
+        .btn-music { background: var(--accent-green); border: none; color: white; }
+        .btn-photo { background: var(--accent-blue); border: none; color: white; }
+
+        .results-list { margin-top: 10px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .track-item { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; cursor: pointer; gap: 10px; border-radius: 4px; }
         .music-cover { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; background: #222; }
         .track-info { display: flex; flex-direction: column; overflow: hidden; }
         .track-title { font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -69,20 +76,22 @@
             </div>
         </div>
 
-        <!-- VIDEO DOWNLOAD -->
+        <!-- VIDEO DOWNLOADER -->
         <div class="card" id="card-video" onclick="openCard('video')">
             <div class="card-title">🎥 Video Downloader</div>
             <div class="card-content" id="content-video">
                 <input type="text" id="input-video" placeholder="Вставьте ссылку на видео..." oninput="handleVideoInput()" onclick="event.stopPropagation()">
+                
+                <!-- Блок серых отдельных кнопок -->
                 <div id="video-actions" style="display: none;">
-                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 8px;">Выберите качество для скачивания:</div>
-                    <div class="btn-grid">
-                        <button class="btn-action btn-video" onclick="sendVideoQuery('1080')">🎬 1080p Full HD</button>
-                        <button class="btn-action btn-video" onclick="sendVideoQuery('720')">🎬 720p HD</button>
-                        <button class="btn-action btn-video" onclick="sendVideoQuery('480')">🎬 480p</button>
-                        <button class="btn-action btn-video" onclick="sendVideoQuery('360')">🎬 360p</button>
+                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 10px; margin-bottom: 2px;">Выберите качество:</div>
+                    <div class="btn-list">
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('1080')">🎬 Скачать 1080p (Full HD)</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('720')">🎬 Скачать 720p (HD)</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('480')">🎬 Скачать 480p</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('360')">🎬 Скачать 360p</button>
+                        <button class="btn-action btn-grey-quality" style="border-color: #444;" onclick="sendVideoQuery('audio')">🎵 Скачать Audio (MP3)</button>
                     </div>
-                    <button class="btn-action btn-audio" style="margin-top: 6px;" onclick="sendVideoQuery('audio')">🎵 Скачать только Audio (MP3)</button>
                 </div>
             </div>
         </div>
@@ -90,6 +99,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
 
         let activeType = null;
@@ -119,8 +129,11 @@
             activeType = null;
         }
 
+        // Функция отправки данных в Telegram бота
         function sendQuery(cmd, val) {
-            tg.sendData(`${cmd} ${val}`);
+            const dataToSend = `${cmd} ${val}`;
+            tg.sendData(dataToSend);
+            tg.close(); // Автоматически закрывает WebApp после клика
         }
 
         function handleMusicInput() {
@@ -131,7 +144,7 @@
             if (!val) { resBox.innerHTML = ''; return; }
 
             if (val.includes('spotify.com') || val.startsWith('http://') || val.startsWith('https://')) {
-                resBox.innerHTML = `<button class="btn-action btn-music" style="margin-top:8px;" onclick="sendQuery('/music', '${val}')">🎧 Скачать по ссылке</button>`;
+                resBox.innerHTML = `<button class="btn-action btn-music" onclick="sendQuery('/music', '${val}')">🎧 Скачать по ссылке</button>`;
                 return;
             }
 
@@ -153,7 +166,7 @@
                                     </div>`;
                             });
                         }
-                        html += `<button class="btn-action btn-music" style="margin-top:8px;" onclick="sendQuery('/music', '${escapeQuotes(val)}')">🔍 Скачать: "${escapeHtml(val)}"</button>`;
+                        html += `<button class="btn-action btn-music" onclick="sendQuery('/music', '${escapeQuotes(val)}')">🔍 Найти: "${escapeHtml(val)}"</button>`;
                         resBox.innerHTML = html;
                     });
             }, 300);
@@ -162,7 +175,7 @@
         function handleVideoInput() {
             const val = document.getElementById('input-video').value.trim();
             const actions = document.getElementById('video-actions');
-            if (val.startsWith('http://') || val.startsWith('https://')) {
+            if (val.length > 5 && (val.startsWith('http://') || val.startsWith('https://'))) {
                 actions.style.display = 'block';
             } else {
                 actions.style.display = 'none';
@@ -172,7 +185,7 @@
         function sendVideoQuery(quality) {
             const url = document.getElementById('input-video').value.trim();
             if (url) {
-                tg.sendData(`/video ${quality} ${url}`);
+                sendQuery('/video', `${quality} ${url}`);
             }
         }
 
@@ -180,7 +193,7 @@
             const val = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
             if (!val) { resBox.innerHTML = ''; return; }
-            resBox.innerHTML = `<button class="btn-action btn-photo" style="margin-top:8px;" onclick="sendQuery('/photo', '${escapeQuotes(val)}')">🖼 Найти фото: "${escapeHtml(val)}"</button>`;
+            resBox.innerHTML = `<button class="btn-action btn-photo" onclick="sendQuery('/photo', '${escapeQuotes(val)}')">🖼 Искать фото: "${escapeHtml(val)}"</button>`;
         }
 
         function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
