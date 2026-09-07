@@ -172,9 +172,9 @@
 </head>
 <body>
 
-    <div class="header">Kiwifyx / Search</div>
+    <div class="header">Kiwifyx / App</div>
 
-    <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Back to Menu</button>
+    <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
     <div class="container">
         
@@ -182,8 +182,8 @@
         <div class="card" id="card-music" onclick="openCard('music')">
             <div class="card-title">Music Search</div>
             <div class="card-content" id="content-music">
-                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="realSearch('music')" onclick="event.stopPropagation()">
-                <div class="status" id="status-music">Searching...</div>
+                <input type="text" id="input-music" placeholder="Песня или исполнитель..." oninput="searchItunes('music')" onclick="event.stopPropagation()">
+                <div class="status" id="status-music">Поиск...</div>
                 <div class="results-list" id="results-music"></div>
             </div>
         </div>
@@ -192,18 +192,17 @@
         <div class="card" id="card-photo" onclick="openCard('photo')">
             <div class="card-title">Photo Search</div>
             <div class="card-content" id="content-photo">
-                <input type="text" id="input-photo" placeholder="Search image title..." oninput="realSearch('photo')" onclick="event.stopPropagation()">
-                <div class="status" id="status-photo">Searching...</div>
+                <input type="text" id="input-photo" placeholder="Название фото..." oninput="handleDirectText('photo')" onclick="event.stopPropagation()">
                 <div class="results-list" id="results-photo"></div>
             </div>
         </div>
 
         <!-- VIDEO -->
         <div class="card" id="card-video" onclick="openCard('video')">
-            <div class="card-title">Video Search & Download</div>
+            <div class="card-title">Video Search</div>
             <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Video name or link..." oninput="realSearch('video')" onclick="event.stopPropagation()">
-                <div class="status" id="status-video">Searching...</div>
+                <input type="text" id="input-video" placeholder="Название видео или ссылка..." oninput="searchItunes('video')" onclick="event.stopPropagation()">
+                <div class="status" id="status-video">Поиск...</div>
                 <div class="results-list" id="results-video"></div>
             </div>
         </div>
@@ -212,7 +211,7 @@
         <div class="card" id="card-audio" onclick="openCard('audio')">
             <div class="card-title">Audio Extract</div>
             <div class="card-content" id="content-audio">
-                <input type="text" id="input-audio" placeholder="Paste video link..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
+                <input type="text" id="input-audio" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
             </div>
         </div>
 
@@ -250,8 +249,7 @@
             activeType = null;
         }
 
-        // Обход CORS с помощью JSONP для настоящих результатов
-        function realSearch(type) {
+        function searchItunes(type) {
             clearTimeout(searchTimeout);
             const query = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
@@ -268,47 +266,55 @@
                 return;
             }
 
-            status.innerText = "Searching real tracks...";
+            status.innerText = "Ищем...";
             status.style.display = 'block';
 
             searchTimeout = setTimeout(() => {
-                window.handleDeezerResponse = function(data) {
-                    status.style.display = 'none';
-                    if (!data || !data.data || data.data.length === 0) {
-                        resBox.innerHTML = '<div class="track-artist" style="padding:8px;">Nothing found</div>';
-                        return;
-                    }
+                const entity = type === 'video' ? 'musicVideo' : 'song';
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=${entity}&limit=10`)
+                    .then(res => res.json())
+                    .then(data => {
+                        status.style.display = 'none';
+                        let html = '';
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(item => {
+                                const title = item.trackName || query;
+                                const artist = item.artistName || 'Artist';
+                                const cover = item.artworkUrl100 || 'https://via.placeholder.com/100';
+                                const fullQuery = `${artist} - ${title}`;
 
-                    let html = '';
-                    data.data.slice(0, 15).forEach(item => {
-                        const title = item.title || 'Unknown Track';
-                        const artist = item.artist ? item.artist.name : 'Unknown Artist';
-                        const cover = item.album ? item.album.cover_medium : '';
-                        const fullQuery = `${artist} - ${title}`;
-
-                        html += `
-                            <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(fullQuery)}')">
-                                <div class="track-left">
-                                    <img class="track-cover" src="${cover}" alt="cover">
-                                    <div class="track-info">
-                                        <div class="track-title">${escapeHtml(title)}</div>
-                                        <div class="track-artist">${escapeHtml(artist)}</div>
+                                html += `
+                                    <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(fullQuery)}')">
+                                        <div class="track-left">
+                                            <img class="track-cover" src="${cover}" alt="cover">
+                                            <div class="track-info">
+                                                <div class="track-title">${escapeHtml(title)}</div>
+                                                <div class="track-artist">${escapeHtml(artist)}</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        `;
+                                `;
+                            });
+                        }
+                        html += `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">Скачать: "${escapeHtml(query)}"</div></div>`;
+                        resBox.innerHTML = html;
+                    })
+                    .catch(() => {
+                        status.style.display = 'none';
+                        resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">Запросить: "${escapeHtml(query)}"</div></div>`;
                     });
-                    resBox.innerHTML = html;
-                };
+            }, 300);
+        }
 
-                const oldScript = document.getElementById('jsonp-script');
-                if (oldScript) oldScript.remove();
-
-                const script = document.createElement('script');
-                script.id = 'jsonp-script';
-                script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=handleDeezerResponse`;
-                document.body.appendChild(script);
-            }, 350);
+        function handleDirectText(type) {
+            clearTimeout(searchTimeout);
+            const query = document.getElementById(`input-${type}`).value.trim();
+            const resBox = document.getElementById(`results-${type}`);
+            if (!query) {
+                resBox.innerHTML = '';
+                return;
+            }
+            resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">Найти картинку: "${escapeHtml(query)}"</div></div>`;
         }
 
         function handleDirectLink(type) {
@@ -326,7 +332,7 @@
                 tg.sendData(JSON.stringify({ type: type, query: queryText }));
                 setTimeout(() => { tg.close(); }, 100);
             } catch (e) {
-                alert("Launch inside Telegram bot");
+                alert("Открывайте через Telegram bot");
             }
         }
 
