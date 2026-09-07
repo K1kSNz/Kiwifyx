@@ -3,124 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiwifyx Downloader</title>
+    <title>Kiwifyx / Control Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: var(--tg-theme-bg-color, #18191a);
-            color: var(--tg-theme-text-color, #ffffff);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            padding: 20px;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        input {
-            padding: 14px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: var(--tg-theme-secondary-bg-color, #242526);
-            color: inherit;
-            font-size: 16px;
-            outline: none;
-        }
-        button {
-            padding: 14px;
-            border-radius: 10px;
-            border: none;
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:active {
-            opacity: 0.8;
-        }
-        #result {
-            margin-top: 15px;
-            text-align: center;
-            word-break: break-all;
-        }
-        .download-link {
-            display: block;
-            margin-top: 10px;
-            padding: 12px;
-            background: #2ea44f;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+        body { background-color: #0d0d0d; color: #e0e0e0; padding: 15px; }
+        .header { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #ffffff; border-bottom: 1px solid #222; padding-bottom: 8px; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px 15px; cursor: pointer; border-radius: 4px; flex: 1; text-align: center; }
+        .tab-btn.active { background: #2a2a2a; border-color: #555; }
+        .panel { display: none; background: #141414; border: 1px solid #262626; border-radius: 6px; padding: 15px; }
+        .panel.active { display: block; }
+        input[type="text"], select { width: 100%; padding: 10px; background: #080808; border: 1px solid #333; color: #fff; border-radius: 4px; margin-bottom: 12px; outline: none; }
+        input[type="text"]:focus { border-color: #555; }
+        .btn-submit { width: 100%; padding: 10px; background: #2b2b2b; color: #fff; border: 1px solid #444; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .btn-submit:hover { background: #3a3a3a; }
+        .results-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+        .track-item { display: flex; align-items: center; background: #181818; border: 1px solid #282828; padding: 8px; border-radius: 4px; cursor: pointer; }
+        .track-item:hover { border-color: #555; background: #222; }
+        .track-cover { width: 48px; height: 48px; border-radius: 4px; margin-right: 12px; object-fit: cover; background: #222; }
+        .track-info { display: flex; flex-direction: column; overflow: hidden; }
+        .track-title { font-size: 14px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 12px; color: #888; margin-top: 2px; }
+        .status-msg { padding: 12px; color: #666; font-size: 12px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Kiwifyx Downloader</h2>
-        <input type="text" id="mediaUrl" placeholder="Вставь ссылку (YouTube, TikTok...)">
-        <button onclick="getMedia()">Скачать</button>
-        <div id="result"></div>
+    <div class="header">Kiwifyx / Control Panel</div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="openTab('video', this)">Video Download</button>
+        <button class="tab-btn" onclick="openTab('music', this)">Music Download</button>
+    </div>
+
+    <!-- VIDEO -->
+    <div id="video" class="panel active">
+        <input type="text" id="video-url" placeholder="Вставьте ссылку на видео (YouTube, TikTok и др.)...">
+        <div style="display: flex; gap: 10px;">
+            <select id="video-quality" style="flex: 2;">
+                <option value="1080p">1080p Quality</option>
+                <option value="720p">720p Quality</option>
+                <option value="480p">480p Quality</option>
+                <option value="audio">Только звук (MP3)</option>
+            </select>
+            <button class="btn-submit" style="flex: 1;" onclick="sendVideoRequest()">Скачать</button>
+        </div>
+    </div>
+
+    <!-- MUSIC -->
+    <div id="music" class="panel">
+        <input type="text" id="music-search" placeholder="Ссылка на песню или название..." oninput="handleSearchInput(this.value)">
+        <div class="results-list" id="music-results">
+            <div class="status-msg">Введите название песни или ссылку</div>
+        </div>
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
 
-        async function getMedia() {
-            let url = document.getElementById('mediaUrl').value.trim();
-            let resultDiv = document.getElementById('result');
+        let searchTimeout = null;
 
-            if (!url) {
-                resultDiv.innerHTML = "❌ Введи ссылку!";
+        function openTab(tabName, element) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function handleSearchInput(value) {
+            clearTimeout(searchTimeout);
+            const query = value.trim();
+
+            if (!query) {
+                document.getElementById('music-results').innerHTML = `<div class="status-msg">Введите название песни или ссылку</div>`;
                 return;
             }
 
-            resultDiv.innerHTML = "⏳ Обработка ссылки...";
-
-            try {
-                // Используем стабильный публичный API для скачивания прямо из браузера
-                let response = await fetch('https://api.cobalt.tools/api/json', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        url: url,
-                        vQuality: '720'
-                    })
-                });
-
-                let data = await response.json();
-
-                if (data.status === 'stream' || data.status === 'redirect') {
-                    resultDiv.innerHTML = `<a class="download-link" href="${data.url}" target="_blank">📥 Скачать файл</a>`;
-                } else if (data.status === 'picker') {
-                    let html = '<b>Выбери формат:</b><br>';
-                    data.picker.forEach(item => {
-                        html += `<a class="download-link" href="${item.url}" target="_blank">🔗 Скачать (${item.type || 'файл'})</a>`;
-                    });
-                    resultDiv.innerHTML = html;
-                } else {
-                    resultDiv.innerHTML = "❌ Не удалось получить ссылку на файл.";
-                }
-            } catch (err) {
-                resultDiv.innerHTML = "❌ Ошибка соединения: " + err.message;
+            if (query.startsWith('http://') || query.startsWith('https://')) {
+                document.getElementById('music-results').innerHTML = `
+                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="sendMusicRequest('${escapeQuotes(query)}')">
+                        🎧 Скачать по ссылке
+                    </button>`;
+                return;
             }
+
+            document.getElementById('music-results').innerHTML = `<div class="status-msg">Поиск...</div>`;
+
+            searchTimeout = setTimeout(() => {
+                searchTracks(query);
+            }, 300);
+        }
+
+        function searchTracks(query) {
+            const container = document.getElementById('music-results');
+            const script = document.createElement('script');
+            const callbackName = 'deezerCallback_' + Math.round(100000 * Math.random());
+            
+            window[callbackName] = function(data) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+
+                if (!data.data || data.data.length === 0) {
+                    container.innerHTML = `<div class="status-msg">Ничего не найдено</div>`;
+                    return;
+                }
+
+                container.innerHTML = data.data.map(track => {
+                    const fullTitle = `${track.artist.name} - ${track.title}`;
+                    return `
+                        <div class="track-item" onclick="sendMusicRequest('${escapeQuotes(fullTitle)}')">
+                            <img class="track-cover" src="${track.album.cover_medium}" alt="cover">
+                            <div class="track-info">
+                                <div class="track-title">${escapeHtml(track.title)}</div>
+                                <div class="track-artist">${escapeHtml(track.artist.name)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=12&output=jsonp&callback=${callbackName}`;
+            document.body.appendChild(script);
+        }
+
+        function sendVideoRequest() {
+            const url = document.getElementById('video-url').value.trim();
+            const quality = document.getElementById('video-quality').value;
+            if (!url) return alert('Введите ссылку!');
+            
+            const mode = quality === 'audio' ? 'audio' : 'video';
+            tg.sendData(`${mode}|||${url}|||${quality}`);
+            tg.close();
+        }
+
+        function sendMusicRequest(query) {
+            tg.sendData(`audio|||${query}|||best`);
+            tg.close();
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
     </script>
 </body>
