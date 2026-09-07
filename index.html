@@ -14,6 +14,7 @@
             --border-color: #2a2a2a;
             --text-main: #e1e1e1;
             --text-sub: #888888;
+            --accent-color: #0088cc;
         }
 
         * {
@@ -107,7 +108,7 @@
 
         .results-list {
             margin-top: 8px;
-            max-height: 380px;
+            max-height: 350px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -123,6 +124,7 @@
             padding: 6px 8px;
             cursor: pointer;
             gap: 10px;
+            position: relative;
         }
 
         .track-item:hover {
@@ -168,19 +170,58 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        /* CSS Анимация скачивания */
+        .loading-bar {
+            display: none;
+            width: 100%;
+            height: 3px;
+            background-color: var(--border-color);
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            left: -40%;
+            width: 40%;
+            height: 100%;
+            background-color: var(--accent-color);
+            animation: loading 1.2s infinite linear;
+        }
+
+        @keyframes loading {
+            0% { left: -40%; }
+            100% { left: 100%; }
+        }
+
+        .toast-notify {
+            display: none;
+            padding: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            color: var(--text-main);
+            font-size: 11px;
+            margin-top: 8px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">Kiwifyx / App</div>
+    <div class="header">Kiwifyx / Control Panel</div>
 
     <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
     <div class="container">
-        
+        <div class="toast-notify" id="toast">⏳ Отправка команды боту... Файл появится в чате!</div>
+        <div class="loading-bar" id="loader"></div>
+
         <!-- MUSIC -->
         <div class="card" id="card-music" onclick="openCard('music')">
-            <div class="card-title">Music Search</div>
+            <div class="card-title">🎵 Music Search</div>
             <div class="card-content" id="content-music">
                 <input type="text" id="input-music" placeholder="Песня или исполнитель..." oninput="searchItunes('music')" onclick="event.stopPropagation()">
                 <div class="status" id="status-music">Поиск...</div>
@@ -190,18 +231,18 @@
 
         <!-- PHOTO -->
         <div class="card" id="card-photo" onclick="openCard('photo')">
-            <div class="card-title">Photo Search</div>
+            <div class="card-title">🖼 Photo Search</div>
             <div class="card-content" id="content-photo">
-                <input type="text" id="input-photo" placeholder="Название фото..." oninput="handleDirectText('photo')" onclick="event.stopPropagation()">
+                <input type="text" id="input-photo" placeholder="Название картинки..." oninput="handleDirectText('photo')" onclick="event.stopPropagation()">
                 <div class="results-list" id="results-photo"></div>
             </div>
         </div>
 
         <!-- VIDEO -->
         <div class="card" id="card-video" onclick="openCard('video')">
-            <div class="card-title">Video Search</div>
+            <div class="card-title">🎥 Video Search</div>
             <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Название видео или ссылка..." oninput="searchItunes('video')" onclick="event.stopPropagation()">
+                <input type="text" id="input-video" placeholder="Название или ссылка на видео..." oninput="searchItunes('video')" onclick="event.stopPropagation()">
                 <div class="status" id="status-video">Поиск...</div>
                 <div class="results-list" id="results-video"></div>
             </div>
@@ -209,12 +250,11 @@
 
         <!-- AUDIO -->
         <div class="card" id="card-audio" onclick="openCard('audio')">
-            <div class="card-title">Audio Extract</div>
+            <div class="card-title">🎧 Extract Audio</div>
             <div class="card-content" id="content-audio">
                 <input type="text" id="input-audio" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
             </div>
         </div>
-
     </div>
 
     <script>
@@ -296,12 +336,12 @@
                                 `;
                             });
                         }
-                        html += `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">Скачать: "${escapeHtml(query)}"</div></div>`;
+                        html += `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Скачать: "${escapeHtml(query)}"</div></div>`;
                         resBox.innerHTML = html;
                     })
                     .catch(() => {
                         status.style.display = 'none';
-                        resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">Запросить: "${escapeHtml(query)}"</div></div>`;
+                        resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">📥 Скачать: "${escapeHtml(query)}"</div></div>`;
                     });
             }, 300);
         }
@@ -314,7 +354,7 @@
                 resBox.innerHTML = '';
                 return;
             }
-            resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">Найти картинку: "${escapeHtml(query)}"</div></div>`;
+            resBox.innerHTML = `<div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(query)}')"><div class="track-title">🔍 Найти: "${escapeHtml(query)}"</div></div>`;
         }
 
         function handleDirectLink(type) {
@@ -327,12 +367,38 @@
             }
         }
 
+        // Отправка без закрытия WebApp с показом анимации
         function sendToBot(type, queryText) {
-            try {
+            const loader = document.getElementById('loader');
+            const toast = document.getElementById('toast');
+            
+            loader.style.display = 'block';
+            toast.style.display = 'block';
+
+            const userChatId = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+
+            if (userChatId) {
+                // Прямой фоновый запрос на бота
+                fetch('http://localhost:8080/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: userChatId,
+                        type: type,
+                        query: queryText
+                    })
+                }).then(() => {
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                        toast.innerText = "✅ Запрос отправлен! Файл загружается в чат.";
+                        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+                    }, 1000);
+                }).catch(() => {
+                    // Резервный вариант, если локальный сервер недоступен
+                    tg.sendData(JSON.stringify({ type: type, query: queryText }));
+                });
+            } else {
                 tg.sendData(JSON.stringify({ type: type, query: queryText }));
-                setTimeout(() => { tg.close(); }, 100);
-            } catch (e) {
-                alert("Открывайте через Telegram bot");
             }
         }
 
