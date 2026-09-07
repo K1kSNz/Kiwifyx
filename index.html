@@ -7,14 +7,13 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #1e1e24;
-            --card-bg: #2b2b36;
-            --input-bg: #18181c;
-            --accent-color: #4a4e69;
+            --bg-color: #1c1c22;
+            --card-bg: #272730;
+            --input-bg: #141418;
+            --border-color: #383845;
             --btn-green: #2a9d8f;
             --text-main: #f1f1f1;
-            --text-sub: #a0a0ab;
-            --border-color: #3f3f4e;
+            --text-sub: #9a9ab0;
         }
 
         * {
@@ -103,7 +102,6 @@
             font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .card-content {
@@ -125,7 +123,7 @@
             border-color: var(--text-sub);
         }
 
-        /* Листаемый список вариантов */
+        /* Листаемый список результатов */
         .results-list {
             margin-top: 10px;
             max-height: 280px;
@@ -133,7 +131,6 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            padding-right: 2px;
         }
 
         .results-list::-webkit-scrollbar {
@@ -172,8 +169,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 210px;
-            color: var(--text-main);
+            max-width: 200px;
         }
 
         .result-author {
@@ -182,7 +178,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 210px;
+            max-width: 200px;
         }
 
         .download-btn {
@@ -196,7 +192,6 @@
             white-space: nowrap;
         }
 
-        /* Индикатор загрузки */
         .loader-box {
             display: none;
             margin-top: 10px;
@@ -248,7 +243,7 @@
             <div class="card-content" id="content-music">
                 <input type="text" id="input-music" placeholder="Введите название или автора..." oninput="liveSearchMusic()" onclick="event.stopPropagation()">
                 <div class="loader-box" id="loader-music">
-                    <span style="font-size: 11px; color: var(--text-sub);">Отправка запроса боту...</span>
+                    <span style="font-size: 11px; color: var(--text-sub);">Отправка боту...</span>
                     <div class="progress-bar"><div class="progress-fill"></div></div>
                 </div>
                 <div class="results-list" id="results-music"></div>
@@ -284,7 +279,7 @@
             <div class="card-content" id="content-video">
                 <input type="text" id="input-video" placeholder="Вставьте ссылку на видео..." oninput="handleDirectLink('video')" onclick="event.stopPropagation()">
                 <div class="loader-box" id="loader-video">
-                    <span style="font-size: 11px; color: var(--text-sub);">Скачивание видео...</span>
+                    <span style="font-size: 11px; color: var(--text-sub);">Загрузка видео...</span>
                     <div class="progress-bar"><div class="progress-fill"></div></div>
                 </div>
             </div>
@@ -299,7 +294,7 @@
                 <div class="card-title">🎧 Вырезать аудио</div>
             </div>
             <div class="card-content" id="content-audio">
-                <input type="text" id="input-audio" placeholder="Вставьте ссылку для извлечения звука..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
+                <input type="text" id="input-audio" placeholder="Вставьте ссылку..." oninput="handleDirectLink('audio')" onclick="event.stopPropagation()">
                 <div class="loader-box" id="loader-audio">
                     <span style="font-size: 11px; color: var(--text-sub);">Извлечение аудио...</span>
                     <div class="progress-bar"><div class="progress-fill"></div></div>
@@ -341,7 +336,6 @@
             activeType = null;
         }
 
-        // Поиск музыки в реальном времени
         function liveSearchMusic() {
             clearTimeout(searchTimeout);
             const val = document.getElementById('input-music').value.trim();
@@ -350,19 +344,17 @@
             if (!val) { resBox.innerHTML = ''; return; }
 
             searchTimeout = setTimeout(() => {
-                // Генерация гибких вариантов
-                const mockList = [
-                    { title: `${val}`, author: "Оригинальный трек" },
-                    { title: `${val} (Remix)`, author: "DJ Edition / Club Mix" },
-                    { title: `${val} (Speed Up)`, author: "Nightcore Version" },
-                    { title: `${val} (Slowed + Reverb)`, author: "Lo-Fi Atmosphere" },
-                    { title: `${val} (Acoustic)`, author: "Live Acoustic" },
-                    { title: `${val} (Instrumental)`, author: "No Vocal Mix" },
-                    { title: `${val} (Extended Mix)`, author: "Full Length" }
+                const list = [
+                    { title: `${val}`, author: "Оригинальная версия" },
+                    { title: `${val} (Remix)`, author: "Club / Dance Edition" },
+                    { title: `${val} (Speed Up)`, author: "TikTok Trend" },
+                    { title: `${val} (Slowed + Reverb)`, author: "Lo-Fi Version" },
+                    { title: `${val} (Acoustic)`, author: "Acoustic Cover" },
+                    { title: `${val} (Instrumental)`, author: "Karaoke / Beat" }
                 ];
 
                 let html = '';
-                mockList.forEach((item) => {
+                list.forEach((item) => {
                     html += `
                         <div class="result-item">
                             <div class="result-info">
@@ -382,7 +374,6 @@
             }, 300);
         }
 
-        // Поиск Photo в реальном времени
         function liveSearchPhoto() {
             clearTimeout(searchTimeout);
             const val = document.getElementById('input-photo').value.trim();
@@ -392,11 +383,10 @@
 
             searchTimeout = setTimeout(() => {
                 const photoOptions = [
-                    { title: `${val} HD`, author: "Aesthetic Collection" },
-                    { title: `${val} Minimalist`, author: "Pinterest Style" },
-                    { title: `${val} Wallpaper`, author: "4K Art Background" },
-                    { title: `${val} Dark Tone`, author: "Atmospheric" },
-                    { title: `${val} Vintage`, author: "Retro Aesthetic" }
+                    { title: `${val} Aesthetic`, author: "Pinterest Collection" },
+                    { title: `${val} HD Wallpaper`, author: "Background Art" },
+                    { title: `${val} Minimalist`, author: "Clean Aesthetic" },
+                    { title: `${val} Vintage`, author: "Retro Vibe" }
                 ];
 
                 let html = '';
@@ -420,7 +410,6 @@
             }, 300);
         }
 
-        // Авто-обработка прямых ссылок для Видео и Аудио
         function handleDirectLink(type) {
             clearTimeout(searchTimeout);
             const val = document.getElementById(`input-${type}`).value.trim();
@@ -431,16 +420,15 @@
             }
         }
 
-        // Безопасная отправка в Telegram
         function sendToBot(type, queryText) {
             const loader = document.getElementById(`loader-${type}`);
             if (loader) loader.style.display = 'block';
 
             try {
                 tg.sendData(JSON.stringify({ type: type, query: queryText }));
-                setTimeout(() => { tg.close(); }, 600);
+                setTimeout(() => { tg.close(); }, 500);
             } catch (e) {
-                alert("Ошибка: Запустите Web App внутри Telegram!");
+                alert("Запускайте Web App внутри бота Telegram!");
                 if (loader) loader.style.display = 'none';
             }
         }
