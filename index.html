@@ -33,11 +33,9 @@
         
         input { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 10px; color: var(--text-main); font-size: 12px; outline: none; border-radius: 4px; }
         
-        /* Сетка серых отдельных кнопок */
         .btn-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
         .btn-action { width: 100%; border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; text-align: center; }
         
-        /* Отдельные серые кнопки */
         .btn-grey-quality { background: var(--btn-grey); border: 1px solid #333; }
         .btn-grey-quality:hover { background: var(--btn-grey-hover); border-color: #555; }
 
@@ -46,6 +44,7 @@
 
         .results-list { margin-top: 10px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
         .track-item { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; cursor: pointer; gap: 10px; border-radius: 4px; }
+        .track-item:hover { background: var(--hover-bg); }
         .music-cover { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; background: #222; }
         .track-info { display: flex; flex-direction: column; overflow: hidden; }
         .track-title { font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -82,7 +81,6 @@
             <div class="card-content" id="content-video">
                 <input type="text" id="input-video" placeholder="Вставьте ссылку на видео..." oninput="handleVideoInput()" onclick="event.stopPropagation()">
                 
-                <!-- Блок серых отдельных кнопок -->
                 <div id="video-actions" style="display: none;">
                     <div style="font-size: 11px; color: var(--text-sub); margin-top: 10px; margin-bottom: 2px;">Выберите формат и качество:</div>
                     <div class="btn-list">
@@ -129,7 +127,6 @@
             activeType = null;
         }
 
-        // Функция отправки данных Telegram боту
         function sendQuery(cmd, val) {
             const fullMessage = `${cmd} ${val}`;
             tg.sendData(fullMessage);
@@ -149,7 +146,7 @@
             }
 
             searchTimeout = setTimeout(() => {
-                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(val)}&entity=song&limit=5`)
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(val)}&entity=song&limit=6`)
                     .then(res => res.json())
                     .then(data => {
                         let html = '';
@@ -166,7 +163,6 @@
                                     </div>`;
                             });
                         }
-                        html += `<button class="btn-action btn-music" onclick="sendQuery('/music', '${escapeQuotes(val)}')">🔍 Найти: "${escapeHtml(val)}"</button>`;
                         resBox.innerHTML = html;
                     });
             }, 300);
