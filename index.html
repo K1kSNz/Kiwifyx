@@ -128,8 +128,7 @@
         }
 
         function sendQuery(cmd, val) {
-            const fullMessage = `${cmd} ${val}`;
-            tg.sendData(fullMessage);
+            tg.sendData(`${cmd} ${val}`);
             tg.close();
         }
 
@@ -152,9 +151,10 @@
                         let html = '';
                         if (data.results && data.results.length > 0) {
                             data.results.forEach(item => {
-                                const fullQuery = `${item.artistName} - ${item.trackName}`;
+                                const songTitle = `${item.artistName} - ${item.trackName}`;
+                                const cleanTitle = songTitle.replace(/'/g, "\\'").replace(/"/g, '\\"');
                                 html += `
-                                    <div class="track-item" onclick="sendQuery('/music', '${escapeQuotes(fullQuery)}')">
+                                    <div class="track-item" onclick="sendQuery('/music', '${cleanTitle}')">
                                         <img class="music-cover" src="${item.artworkUrl100}">
                                         <div class="track-info">
                                             <div class="track-title">${escapeHtml(item.trackName)}</div>
@@ -189,11 +189,11 @@
             const val = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
             if (!val) { resBox.innerHTML = ''; return; }
-            resBox.innerHTML = `<button class="btn-action btn-photo" onclick="sendQuery('/photo', '${escapeQuotes(val)}')">🖼 Искать фото: "${escapeHtml(val)}"</button>`;
+            const cleanVal = val.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            resBox.innerHTML = `<button class="btn-action btn-photo" onclick="sendQuery('/photo', '${cleanVal}')">🖼 Искать фото: "${escapeHtml(val)}"</button>`;
         }
 
         function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
-        function escapeQuotes(str) { return str.replace(/'/g, "\\'").replace(/"/g, '\\"'); }
     </script>
 </body>
 </html>
