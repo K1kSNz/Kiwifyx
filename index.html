@@ -98,6 +98,13 @@
             outline: none;
         }
 
+        .status {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 6px;
+            display: none;
+        }
+
         .results-list {
             margin-top: 8px;
             max-height: 380px;
@@ -175,7 +182,8 @@
         <div class="card" id="card-music" onclick="openCard('music')">
             <div class="card-title">Music Search</div>
             <div class="card-content" id="content-music">
-                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="liveSearch('music')" onclick="event.stopPropagation()">
+                <input type="text" id="input-music" placeholder="Track or artist name..." oninput="realSearch('music')" onclick="event.stopPropagation()">
+                <div class="status" id="status-music">Searching...</div>
                 <div class="results-list" id="results-music"></div>
             </div>
         </div>
@@ -184,7 +192,8 @@
         <div class="card" id="card-photo" onclick="openCard('photo')">
             <div class="card-title">Photo Search</div>
             <div class="card-content" id="content-photo">
-                <input type="text" id="input-photo" placeholder="Search image title..." oninput="liveSearch('photo')" onclick="event.stopPropagation()">
+                <input type="text" id="input-photo" placeholder="Search image title..." oninput="realSearch('photo')" onclick="event.stopPropagation()">
+                <div class="status" id="status-photo">Searching...</div>
                 <div class="results-list" id="results-photo"></div>
             </div>
         </div>
@@ -193,7 +202,8 @@
         <div class="card" id="card-video" onclick="openCard('video')">
             <div class="card-title">Video Search & Download</div>
             <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Video name or link..." oninput="liveSearch('video')" onclick="event.stopPropagation()">
+                <input type="text" id="input-video" placeholder="Video name or link..." oninput="realSearch('video')" onclick="event.stopPropagation()">
+                <div class="status" id="status-video">Searching...</div>
                 <div class="results-list" id="results-video"></div>
             </div>
         </div>
@@ -233,18 +243,23 @@
                 if (input) input.value = '';
                 const res = document.getElementById(`results-${t}`);
                 if (res) res.innerHTML = '';
+                const st = document.getElementById(`status-${t}`);
+                if (st) st.style.display = 'none';
             });
             document.getElementById('backBtn').style.display = 'none';
             activeType = null;
         }
 
-        function liveSearch(type) {
+        // Обход CORS с помощью JSONP для настоящих результатов
+        function realSearch(type) {
             clearTimeout(searchTimeout);
             const query = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
+            const status = document.getElementById(`status-${type}`);
 
             if (!query) {
                 resBox.innerHTML = '';
+                status.style.display = 'none';
                 return;
             }
 
@@ -253,44 +268,47 @@
                 return;
             }
 
-            searchTimeout = setTimeout(() => {
-                let items = [];
-                if (type === 'music') {
-                    items = [
-                        { title: query, artist: "Original Version", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "1") + "/200/200" },
-                        { title: `${query} (Slowed + Reverb)`, artist: "Lo-Fi Remix", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "2") + "/200/200" },
-                        { title: `${query} (Speed Up)`, artist: "TikTok Version", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "3") + "/200/200" },
-                        { title: `${query} (Sped Up)`, artist: "Nightcore Mix", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "4") + "/200/200" }
-                    ];
-                } else if (type === 'video') {
-                    items = [
-                        { title: `${query} - Official Video`, artist: "YouTube HD", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "v1") + "/200/200" },
-                        { title: `${query} - Music Video`, artist: "4K Clip", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "v2") + "/200/200" }
-                    ];
-                } else if (type === 'photo') {
-                    items = [
-                        { title: `${query} Aesthetic`, artist: "Pinterest Art", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "p1") + "/200/200" },
-                        { title: `${query} Wallpaper`, artist: "HD Background", cover: "https://picsum.photos/seed/" + encodeURIComponent(query + "p2") + "/200/200" }
-                    ];
-                }
+            status.innerText = "Searching real tracks...";
+            status.style.display = 'block';
 
-                let html = '';
-                items.forEach(item => {
-                    const sendVal = `${item.artist} - ${item.title}`;
-                    html += `
-                        <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(sendVal)}')">
-                            <div class="track-left">
-                                <img class="track-cover" src="${item.cover}" alt="cover">
-                                <div class="track-info">
-                                    <div class="track-title">${escapeHtml(item.title)}</div>
-                                    <div class="track-artist">${escapeHtml(item.artist)}</div>
+            searchTimeout = setTimeout(() => {
+                window.handleDeezerResponse = function(data) {
+                    status.style.display = 'none';
+                    if (!data || !data.data || data.data.length === 0) {
+                        resBox.innerHTML = '<div class="track-artist" style="padding:8px;">Nothing found</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    data.data.slice(0, 15).forEach(item => {
+                        const title = item.title || 'Unknown Track';
+                        const artist = item.artist ? item.artist.name : 'Unknown Artist';
+                        const cover = item.album ? item.album.cover_medium : '';
+                        const fullQuery = `${artist} - ${title}`;
+
+                        html += `
+                            <div class="track-item" onclick="sendToBot('${type}', '${escapeQuotes(fullQuery)}')">
+                                <div class="track-left">
+                                    <img class="track-cover" src="${cover}" alt="cover">
+                                    <div class="track-info">
+                                        <div class="track-title">${escapeHtml(title)}</div>
+                                        <div class="track-artist">${escapeHtml(artist)}</div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                });
-                resBox.innerHTML = html;
-            }, 100);
+                        `;
+                    });
+                    resBox.innerHTML = html;
+                };
+
+                const oldScript = document.getElementById('jsonp-script');
+                if (oldScript) oldScript.remove();
+
+                const script = document.createElement('script');
+                script.id = 'jsonp-script';
+                script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&output=jsonp&callback=handleDeezerResponse`;
+                document.body.appendChild(script);
+            }, 350);
         }
 
         function handleDirectLink(type) {
