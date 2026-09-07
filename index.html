@@ -182,7 +182,7 @@
     <!-- Вкладка VIDEO DOWNLOAD -->
     <div id="video" class="panel active">
         <div class="layout-video">
-            <input type="text" id="video-url" placeholder="Вставьте ссылку на YouTube или видео...">
+            <input type="text" id="video-url" placeholder="Вставьте ссылку на YouTube или другое видео...">
             <div class="layout-video-bottom">
                 <select id="video-quality" style="flex: 2;">
                     <option value="1080p">1080p Quality</option>
@@ -197,10 +197,10 @@
 
     <!-- Вкладка MUSIC DOWNLOAD -->
     <div id="music" class="panel">
-        <input type="text" id="music-search" placeholder="Поиск песни на площадках..." oninput="handleSearchInput(this.value)">
+        <input type="text" id="music-search" placeholder="Ссылка на трек или название песни..." oninput="handleSearchInput(this.value)">
         
         <div class="results-list" id="music-results">
-            <div class="status-msg">Введите название песни или исполнителя</div>
+            <div class="status-msg">Введите название песни или вставьте ссылку</div>
         </div>
     </div>
 
@@ -224,7 +224,16 @@
             const query = value.trim();
 
             if (!query) {
-                document.getElementById('music-results').innerHTML = `<div class="status-msg">Введите название песни или исполнителя</div>`;
+                document.getElementById('music-results').innerHTML = `<div class="status-msg">Введите название песни или вставьте ссылку</div>`;
+                return;
+            }
+
+            // Если вставлена ссылка (Spotify, YouTube, SoundCloud и др.)
+            if (query.startsWith('http://') || query.startsWith('https://')) {
+                document.getElementById('music-results').innerHTML = `
+                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="sendMusicRequest('${escapeQuotes(query)}')">
+                        🎧 Скачать аудио по ссылке
+                    </button>`;
                 return;
             }
 
