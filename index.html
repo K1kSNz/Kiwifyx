@@ -6,152 +6,26 @@
     <title>Kiwifyx / Control Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        body {
-            background-color: #0d0d0d;
-            color: #e0e0e0;
-            padding: 15px;
-        }
-
-        .header {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #ffffff;
-            border-bottom: 1px solid #222;
-            padding-bottom: 8px;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            background: #1a1a1a;
-            color: #fff;
-            border: 1px solid #333;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 4px;
-            flex: 1;
-            text-align: center;
-        }
-
-        .tab-btn.active {
-            background: #2a2a2a;
-            border-color: #555;
-        }
-
-        .panel {
-            display: none;
-            background: #141414;
-            border: 1px solid #262626;
-            border-radius: 6px;
-            padding: 15px;
-        }
-
-        .panel.active {
-            display: block;
-        }
-
-        input[type="text"], select {
-            width: 100%;
-            padding: 10px;
-            background: #080808;
-            border: 1px solid #333;
-            color: #fff;
-            border-radius: 4px;
-            margin-bottom: 12px;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: #555;
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 10px;
-            background: #2b2b2b;
-            color: #fff;
-            border: 1px solid #444;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 4px;
-        }
-
-        .btn-submit:hover {
-            background: #3a3a3a;
-        }
-
-        .results-list {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .track-item {
-            display: flex;
-            align-items: center;
-            background: #181818;
-            border: 1px solid #282828;
-            padding: 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .track-item:hover {
-            border-color: #555;
-            background: #222;
-        }
-
-        .track-cover {
-            width: 48px;
-            height: 48px;
-            border-radius: 4px;
-            margin-right: 12px;
-            object-fit: cover;
-            background: #222;
-        }
-
-        .track-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .track-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-artist {
-            font-size: 12px;
-            color: #888;
-            margin-top: 2px;
-        }
-
-        .status-msg {
-            padding: 12px;
-            color: #666;
-            font-size: 12px;
-            text-align: center;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+        body { background-color: #0d0d0d; color: #e0e0e0; padding: 15px; }
+        .header { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #ffffff; border-bottom: 1px solid #222; padding-bottom: 8px; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 10px 15px; cursor: pointer; border-radius: 4px; flex: 1; text-align: center; }
+        .tab-btn.active { background: #2a2a2a; border-color: #555; }
+        .panel { display: none; background: #141414; border: 1px solid #262626; border-radius: 6px; padding: 15px; }
+        .panel.active { display: block; }
+        input[type="text"], select { width: 100%; padding: 10px; background: #080808; border: 1px solid #333; color: #fff; border-radius: 4px; margin-bottom: 12px; outline: none; }
+        input[type="text"]:focus { border-color: #555; }
+        .btn-submit { width: 100%; padding: 10px; background: #2b2b2b; color: #fff; border: 1px solid #444; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .btn-submit:hover { background: #3a3a3a; }
+        .results-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+        .track-item { display: flex; align-items: center; background: #181818; border: 1px solid #282828; padding: 8px; border-radius: 4px; cursor: pointer; }
+        .track-item:hover { border-color: #555; background: #222; }
+        .track-cover { width: 48px; height: 48px; border-radius: 4px; margin-right: 12px; object-fit: cover; background: #222; }
+        .track-info { display: flex; flex-direction: column; overflow: hidden; }
+        .track-title { font-size: 14px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 12px; color: #888; margin-top: 2px; }
+        .status-msg { padding: 12px; color: #666; font-size: 12px; text-align: center; }
     </style>
 </head>
 <body>
@@ -190,6 +64,9 @@
         tg.ready();
         tg.expand();
 
+        // УКАЖИ СВОЙ ЮЗЕРНЕЙМ БОТА БЕЗ СОБАЧКИ (например: kiwifyx_bot)
+        const BOT_USERNAME = "8580096170"; // Либо замени на юзернейм, если он есть, но токен тоже сработает через открывашку, лучше юзернейм вида my_bot_name
+
         let searchTimeout = null;
 
         function openTab(tabName, element) {
@@ -210,7 +87,7 @@
 
             if (query.startsWith('http://') || query.startsWith('https://')) {
                 document.getElementById('music-results').innerHTML = `
-                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="sendMusicRequest('${encodeURIComponent(query)}')">
+                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="executeRedirect('audio', '${encodeURIComponent(query)}', 'best')">
                         🎧 Скачать по ссылке
                     </button>`;
                 return;
@@ -225,8 +102,6 @@
 
         function searchTracks(query) {
             const container = document.getElementById('music-results');
-            
-            // Используем JSONP для обхода CORS ошибок
             const script = document.createElement('script');
             const callbackName = 'deezerCallback_' + Math.round(100000 * Math.random());
             
@@ -244,7 +119,7 @@
                     const safeTitle = encodeURIComponent(fullTitle);
 
                     return `
-                        <div class="track-item" onclick="sendMusicRequest('${safeTitle}')">
+                        <div class="track-item" onclick="executeRedirect('audio', '${safeTitle}', 'best')">
                             <img class="track-cover" src="${track.album.cover_medium}" alt="cover">
                             <div class="track-info">
                                 <div class="track-title">${escapeHtml(track.title)}</div>
@@ -265,13 +140,18 @@
             if (!url) return alert('Введите ссылку!');
             
             const mode = quality === 'audio' ? 'audio' : 'video';
-            tg.sendData(`${mode}|||${url}|||${quality}`);
-            tg.close();
+            executeRedirect(mode, encodeURIComponent(url), quality);
         }
 
-        function sendMusicRequest(encodedQuery) {
-            const query = decodeURIComponent(encodedQuery);
-            tg.sendData(`audio|||${query}|||best`);
+        function executeRedirect(mode, payload, quality) {
+            // Костыль через открытие ссылки бота, который передает данные прямо в параметр start
+            const dataString = btoa(encodeURIComponent(`${mode}|||${payload}|||${quality}`));
+            // Закрываем приложение и перенаправляем в чат с ботом через deep link параметр
+            window.location.href = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/')}`; // или используем tg.openTelegramLink
+            
+            // Надежный метод закрытия с передачей через открытие ссылки бота
+            // Создаем спец ссылку на бота с параметром
+            tg.openLink(`https://t.me/KiwifyxBot?start=${dataString}`);
             tg.close();
         }
 
