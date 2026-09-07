@@ -3,52 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiwifyx App</title>
+  <title>Kiwifyx UI</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Courier New', Courier, monospace, -apple-system, sans-serif;
     }
 
     body {
-      background-color: #0b0b0b;
-      color: #ffffff;
+      background-color: #121212;
+      color: #b3b3b3;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
+    /* Карточки-секции */
     .card {
       background-color: #000000;
-      border: 1px solid #1f1f1f;
-      border-radius: 14px;
+      border: 1px solid #282828;
+      border-radius: 8px;
       padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     .card-title {
       font-size: 13px;
-      font-weight: 600;
-      color: #8e8e93;
+      font-weight: bold;
+      color: #ffffff;
       text-transform: lowercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
     }
 
+    /* Общие стили для светлых элементов управления */
     .white-box {
       background-color: #ffffff;
-      border-radius: 8px;
+      border-radius: 4px;
       border: none;
       outline: none;
       color: #000000;
+      font-weight: bold;
     }
 
-    /* 1. MENU SECTION */
+    /* 1. СЕКЦИЯ MENU (2 Квадратные кнопки) */
     .menu-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -62,9 +66,13 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .menu-btn:active {
+      opacity: 0.8;
     }
 
     .menu-btn svg {
@@ -73,13 +81,12 @@
       fill: #000000;
     }
 
-    /* 2. VIDEO DOWNLOAD SECTION */
+    /* 2. СЕКЦИЯ VIDEO DOWNLOAD */
     .input-full {
       width: 100%;
-      height: 44px;
+      height: 40px;
       padding: 0 12px;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 13px;
     }
 
     .video-grid {
@@ -90,18 +97,18 @@
 
     .preview-box {
       height: 140px;
+      background-color: #181818;
+      border: 1px solid #282828;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #1a1a1a;
-      border-radius: 8px;
     }
 
     .preview-box svg {
-      width: 40px;
-      height: 40px;
-      fill: #ffffff;
-      opacity: 0.8;
+      width: 36px;
+      height: 36px;
+      fill: #b3b3b3;
     }
 
     .video-actions {
@@ -110,47 +117,74 @@
       justify-content: flex-end;
     }
 
-    .action-btn {
-      height: 44px;
+    .btn-action {
+      height: 40px;
       width: 100%;
-      font-weight: 700;
-      font-size: 14px;
       cursor: pointer;
+      font-size: 13px;
+    }
+
+    /* 3. СЕКЦИЯ MUSIC DOWNLOAD & TRACKLIST */
+    .music-search {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      font-size: 13px;
+    }
+
+    /* Элемент трека в стиле Spotify */
+    .track-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
+      gap: 12px;
+      padding: 8px;
+      background-color: #181818;
+      border-radius: 6px;
+      border: 1px solid #282828;
+      margin-top: 4px;
     }
 
-    /* 3. MUSIC DOWNLOAD SECTION */
-    .music-box {
+    .track-cover {
+      width: 48px;
+      height: 48px;
+      border-radius: 4px;
+      background-color: #282828;
+      object-fit: cover;
+    }
+
+    .track-info {
       display: flex;
-      gap: 8px;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
     }
 
-    .music-box input {
-      flex: 1;
+    .track-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .music-box button {
-      width: 44px;
-      height: 44px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .track-artist {
+      font-size: 11px;
+      color: #b3b3b3;
     }
 
-    .music-box button svg {
-      width: 20px;
-      height: 20px;
-      fill: #000000;
+    .track-tags {
+      font-size: 10px;
+      color: #535353;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   </style>
 </head>
 <body>
 
-  <!-- MENU -->
+  <!-- 1. MENU -->
   <div class="card">
     <div class="card-title">menu</div>
     <div class="menu-grid">
@@ -158,36 +192,41 @@
         <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
         Photo
       </button>
-      <button class="white-box menu-btn" onclick="sendToBot('/music top 2026')">
+      <button class="white-box menu-btn" onclick="sendToBot('/music top')">
         <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-        Top Music
+        Top Tracks
       </button>
     </div>
   </div>
 
-  <!-- VIDEO DOWNLOAD -->
+  <!-- 2. VIDEO DOWNLOAD -->
   <div class="card">
     <div class="card-title">video download</div>
-    <input type="text" id="videoUrl" class="white-box input-full" placeholder="Вставьте ссылку на видео...">
+    <input type="text" id="videoUrl" class="white-box input-full" placeholder="Ссылка на видео...">
     
     <div class="video-grid">
       <div class="preview-box">
         <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
       </div>
       <div class="video-actions">
-        <button class="white-box action-btn" onclick="sendVideo()">Скачать</button>
+        <button class="white-box btn-action" onclick="sendVideo()">Скачать</button>
       </div>
     </div>
   </div>
 
-  <!-- MUSIC DOWNLOAD -->
+  <!-- 3. MUSIC DOWNLOAD -->
   <div class="card">
     <div class="card-title">music download</div>
-    <div class="music-box">
-      <input type="text" id="musicQuery" class="white-box input-full" placeholder="Название трека или ссылка...">
-      <button class="white-box" onclick="sendMusic()">
-        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      </button>
+    <input type="text" id="musicQuery" class="white-box music-search" placeholder="Нажмите Enter для поиска..." onkeypress="handleMusicEnter(event)">
+    
+    <!-- Пример карточки в стиле вашего скриншота -->
+    <div class="track-item">
+      <div class="track-cover"></div>
+      <div class="track-info">
+        <div class="track-title">Linear · 27-11-2022</div>
+        <div class="track-artist">Chinese Cigarettes</div>
+        <div class="track-tags">2020s, Cloud Rap, Digicore, Edm, Electropop</div>
+      </div>
     </div>
   </div>
 
@@ -208,10 +247,12 @@
       }
     }
 
-    function sendMusic() {
-      const query = document.getElementById('musicQuery').value.trim();
-      if (query) {
-        sendToBot(`/music ${query}`);
+    function handleMusicEnter(e) {
+      if (e.key === 'Enter') {
+        const query = document.getElementById('musicQuery').value.trim();
+        if (query) {
+          sendToBot(`/music ${query}`);
+        }
       }
     }
   </script>
