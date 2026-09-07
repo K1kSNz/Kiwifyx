@@ -15,7 +15,7 @@
             --text-main: #e1e1e1;
             --text-sub: #888888;
             --accent-green: #1db954;
-            --accent-red: #ff0000;
+            --accent-red: #e50914;
             --accent-blue: #0088cc;
         }
 
@@ -28,23 +28,21 @@
         .card-title { font-size: 13px; font-weight: bold; }
         .card-content { display: none; margin-top: 10px; }
         input { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; color: var(--text-main); font-size: 12px; outline: none; }
-        .status { font-size: 11px; color: var(--text-sub); margin-top: 6px; display: none; }
+        
+        /* Сетка красивых кнопок для видео */
+        .btn-grid { margin-top: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .btn-action { width: 100%; border: none; color: white; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; }
+        .btn-music { background: var(--accent-green); }
+        .btn-video { background: var(--accent-red); }
+        .btn-audio { background: #333; border: 1px solid #555; }
+        .btn-photo { background: var(--accent-blue); }
+
         .results-list { margin-top: 8px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-        
-        /* Стили списка результатов */
         .track-item { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--border-color); padding: 8px; cursor: pointer; gap: 10px; }
-        .track-item:hover { background: var(--hover-bg); }
         .music-cover { width: 45px; height: 45px; border-radius: 4px; object-fit: cover; background: #222; }
-        .video-cover { width: 70px; height: 40px; border-radius: 4px; object-fit: cover; background: #222; }
-        
         .track-info { display: flex; flex-direction: column; overflow: hidden; }
         .track-title { font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .track-artist { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
-        
-        .btn-action { margin-top: 8px; width: 100%; border: none; color: white; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        .btn-music { background: var(--accent-green); }
-        .btn-video { background: var(--accent-red); }
-        .btn-photo { background: var(--accent-blue); }
     </style>
 </head>
 <body>
@@ -53,32 +51,39 @@
     <button class="back-btn" id="backBtn" onclick="resetMenu()">&lt; Назад</button>
 
     <div class="container">
-        <!-- МУЗЫКА И SPOTIFY -->
+        <!-- MUSIC SEARCH -->
         <div class="card" id="card-music" onclick="openCard('music')">
-            <div class="card-title">🎵 Music & Spotify Search</div>
+            <div class="card-title">🎵 Music Search</div>
             <div class="card-content" id="content-music">
-                <input type="text" id="input-music" placeholder="Ссылка Spotify/URL или название песни..." oninput="handleMusicInput()" onclick="event.stopPropagation()">
-                <div class="status" id="status-music">Поиск треков...</div>
+                <input type="text" id="input-music" placeholder="Ссылка Spotify или название песни..." oninput="handleMusicInput()" onclick="event.stopPropagation()">
                 <div class="results-list" id="results-music"></div>
             </div>
         </div>
 
-        <!-- ВИДЕО YOUTUBE -->
-        <div class="card" id="card-video" onclick="openCard('video')">
-            <div class="card-title">🎥 YouTube Video Search</div>
-            <div class="card-content" id="content-video">
-                <input type="text" id="input-video" placeholder="Ссылка YouTube или название видео..." oninput="handleVideoInput()" onclick="event.stopPropagation()">
-                <div class="status" id="status-video">Поиск роликов...</div>
-                <div class="results-list" id="results-video"></div>
-            </div>
-        </div>
-
-        <!-- ФОТО -->
+        <!-- PHOTO SEARCH -->
         <div class="card" id="card-photo" onclick="openCard('photo')">
             <div class="card-title">🖼 Photo Search</div>
             <div class="card-content" id="content-photo">
                 <input type="text" id="input-photo" placeholder="Название картинки..." oninput="handleDirectText('photo')" onclick="event.stopPropagation()">
                 <div class="results-list" id="results-photo"></div>
+            </div>
+        </div>
+
+        <!-- VIDEO DOWNLOAD -->
+        <div class="card" id="card-video" onclick="openCard('video')">
+            <div class="card-title">🎥 Video Downloader</div>
+            <div class="card-content" id="content-video">
+                <input type="text" id="input-video" placeholder="Вставьте ссылку на видео..." oninput="handleVideoInput()" onclick="event.stopPropagation()">
+                <div id="video-actions" style="display: none;">
+                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 8px;">Выберите качество для скачивания:</div>
+                    <div class="btn-grid">
+                        <button class="btn-action btn-video" onclick="sendVideoQuery('1080')">🎬 1080p Full HD</button>
+                        <button class="btn-action btn-video" onclick="sendVideoQuery('720')">🎬 720p HD</button>
+                        <button class="btn-action btn-video" onclick="sendVideoQuery('480')">🎬 480p</button>
+                        <button class="btn-action btn-video" onclick="sendVideoQuery('360')">🎬 360p</button>
+                    </div>
+                    <button class="btn-action btn-audio" style="margin-top: 6px;" onclick="sendVideoQuery('audio')">🎵 Скачать только Audio (MP3)</button>
+                </div>
             </div>
         </div>
     </div>
@@ -109,6 +114,7 @@
                 const res = document.getElementById(`results-${t}`);
                 if (res) res.innerHTML = '';
             });
+            document.getElementById('video-actions').style.display = 'none';
             document.getElementById('backBtn').style.display = 'none';
             activeType = null;
         }
@@ -117,28 +123,22 @@
             tg.sendData(`${cmd} ${val}`);
         }
 
-        // РАЗДЕЛ МУЗЫКИ
         function handleMusicInput() {
             clearTimeout(searchTimeout);
             const val = document.getElementById('input-music').value.trim();
             const resBox = document.getElementById('results-music');
-            const status = document.getElementById('status-music');
 
-            if (!val) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
+            if (!val) { resBox.innerHTML = ''; return; }
 
             if (val.includes('spotify.com') || val.startsWith('http://') || val.startsWith('https://')) {
-                resBox.innerHTML = `<button class="btn-action btn-music" onclick="sendQuery('/music', '${val}')">🎧 Скачать аудио по ссылке</button>`;
+                resBox.innerHTML = `<button class="btn-action btn-music" style="margin-top:8px;" onclick="sendQuery('/music', '${val}')">🎧 Скачать по ссылке</button>`;
                 return;
             }
 
-            status.innerText = "Поиск музыки...";
-            status.style.display = 'block';
-
             searchTimeout = setTimeout(() => {
-                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(val)}&entity=song&limit=6`)
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(val)}&entity=song&limit=5`)
                     .then(res => res.json())
                     .then(data => {
-                        status.style.display = 'none';
                         let html = '';
                         if (data.results && data.results.length > 0) {
                             data.results.forEach(item => {
@@ -153,63 +153,34 @@
                                     </div>`;
                             });
                         }
-                        html += `<button class="btn-action btn-music" onclick="sendQuery('/music', '${escapeQuotes(val)}')">🔍 Искать аудио: "${escapeHtml(val)}"</button>`;
+                        html += `<button class="btn-action btn-music" style="margin-top:8px;" onclick="sendQuery('/music', '${escapeQuotes(val)}')">🔍 Скачать: "${escapeHtml(val)}"</button>`;
                         resBox.innerHTML = html;
                     });
             }, 300);
         }
 
-        // РАЗДЕЛ ВИДЕО
         function handleVideoInput() {
-            clearTimeout(searchTimeout);
             const val = document.getElementById('input-video').value.trim();
-            const resBox = document.getElementById('results-video');
-            const status = document.getElementById('status-video');
-
-            if (!val) { resBox.innerHTML = ''; status.style.display = 'none'; return; }
-
+            const actions = document.getElementById('video-actions');
             if (val.startsWith('http://') || val.startsWith('https://')) {
-                resBox.innerHTML = `<button class="btn-action btn-video" onclick="sendQuery('/video', '${val}')">🎥 Скачать видео по ссылке</button>`;
-                return;
+                actions.style.display = 'block';
+            } else {
+                actions.style.display = 'none';
             }
+        }
 
-            status.innerText = "Поиск YouTube видео...";
-            status.style.display = 'block';
-
-            searchTimeout = setTimeout(() => {
-                fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(val)}&filter=videos`)
-                    .then(res => res.json())
-                    .then(data => {
-                        status.style.display = 'none';
-                        let html = '';
-                        if (data.items && data.items.length > 0) {
-                            data.items.slice(0, 5).forEach(item => {
-                                const videoUrl = item.url ? `https://www.youtube.com${item.url}` : val;
-                                html += `
-                                    <div class="track-item" onclick="sendQuery('/video', '${escapeQuotes(videoUrl)}')">
-                                        <img class="video-cover" src="${item.thumbnail}">
-                                        <div class="track-info">
-                                            <div class="track-title">${escapeHtml(item.title)}</div>
-                                            <div class="track-artist">${escapeHtml(item.uploaderName)}</div>
-                                        </div>
-                                    </div>`;
-                            });
-                        }
-                        html += `<button class="btn-action btn-video" onclick="sendQuery('/video', '${escapeQuotes(val)}')">🎬 Искать ролик: "${escapeHtml(val)}"</button>`;
-                        resBox.innerHTML = html;
-                    })
-                    .catch(() => {
-                        status.style.display = 'none';
-                        resBox.innerHTML = `<button class="btn-action btn-video" onclick="sendQuery('/video', '${escapeQuotes(val)}')">🎬 Найти и скачать видео: "${escapeHtml(val)}"</button>`;
-                    });
-            }, 300);
+        function sendVideoQuery(quality) {
+            const url = document.getElementById('input-video').value.trim();
+            if (url) {
+                tg.sendData(`/video ${quality} ${url}`);
+            }
         }
 
         function handleDirectText(type) {
             const val = document.getElementById(`input-${type}`).value.trim();
             const resBox = document.getElementById(`results-${type}`);
             if (!val) { resBox.innerHTML = ''; return; }
-            resBox.innerHTML = `<button class="btn-action btn-photo" onclick="sendQuery('/photo', '${escapeQuotes(val)}')">🖼 Найти фото: "${escapeHtml(val)}"</button>`;
+            resBox.innerHTML = `<button class="btn-action btn-photo" style="margin-top:8px;" onclick="sendQuery('/photo', '${escapeQuotes(val)}')">🖼 Найти фото: "${escapeHtml(val)}"</button>`;
         }
 
         function escapeHtml(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
