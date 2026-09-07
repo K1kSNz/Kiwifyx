@@ -3,229 +3,152 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiwifyx UI</title>
+  <title>Kiwifyx / Control Panel</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Courier New', Courier, monospace, -apple-system, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+    body { background-color: #0c0c0c; color: #e0e0e0; padding: 12px; display: flex; flex-direction: column; gap: 16px; }
+    
+    .header { font-size: 16px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 6px; }
 
-    body {
-      background-color: #121212;
-      color: #b3b3b3;
-      padding: 16px;
+    /* Общий стиль секций */
+    .section-card {
+      background: #121212;
+      border: 1px solid #222;
+      border-radius: 6px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 10px;
     }
 
-    /* Карточки-секции */
-    .card {
-      background-color: #000000;
-      border: 1px solid #282828;
-      border-radius: 8px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .card-title {
+    .section-title {
       font-size: 13px;
       font-weight: bold;
-      color: #ffffff;
+      color: #888;
       text-transform: lowercase;
-      letter-spacing: 1px;
     }
 
-    /* Общие стили для светлых элементов управления */
-    .white-box {
-      background-color: #ffffff;
+    /* 1. SECTION MENU (Сетка с пустой кнопкой) */
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .menu-card { 
+      background: #181818; 
+      border: 1px solid #282828; 
+      height: 90px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-weight: bold; 
       border-radius: 4px;
-      border: none;
-      outline: none;
-      color: #000000;
-      font-weight: bold;
+      color: #fff;
+    }
+    .menu-card.empty {
+      background: #101010;
+      border: 1px dashed #222;
+      color: #444;
+      cursor: default;
     }
 
-    /* 1. СЕКЦИЯ MENU (2 Квадратные кнопки) */
-    .menu-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .menu-btn {
-      aspect-ratio: 1 / 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .menu-btn:active {
-      opacity: 0.8;
-    }
-
-    .menu-btn svg {
-      width: 28px;
-      height: 28px;
-      fill: #000000;
-    }
-
-    /* 2. СЕКЦИЯ VIDEO DOWNLOAD */
-    .input-full {
-      width: 100%;
-      height: 40px;
-      padding: 0 12px;
-      font-size: 13px;
-    }
-
-    .video-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .preview-box {
-      height: 140px;
-      background-color: #181818;
+    /* 2. SECTION VIDEO DOWNLOAD */
+    .video-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .preview-placeholder {
+      background: #181818;
       border: 1px solid #282828;
-      border-radius: 6px;
+      border-radius: 4px;
+      height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .preview-box svg {
-      width: 36px;
-      height: 36px;
-      fill: #b3b3b3;
-    }
-
-    .video-actions {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-
-    .btn-action {
-      height: 40px;
-      width: 100%;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    /* 3. СЕКЦИЯ MUSIC DOWNLOAD & TRACKLIST */
-    .music-search {
-      width: 100%;
-      height: 40px;
-      padding: 0 12px;
-      font-size: 13px;
-    }
-
-    /* Элемент трека в стиле Spotify */
-    .track-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
-      background-color: #181818;
-      border-radius: 6px;
-      border: 1px solid #282828;
-      margin-top: 4px;
-    }
-
-    .track-cover {
-      width: 48px;
-      height: 48px;
-      border-radius: 4px;
-      background-color: #282828;
-      object-fit: cover;
-    }
-
-    .track-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      overflow: hidden;
-    }
-
-    .track-title {
-      font-size: 13px;
-      font-weight: bold;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .track-artist {
+      color: #555;
       font-size: 11px;
-      color: #b3b3b3;
     }
+    .video-controls { display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
 
-    .track-tags {
-      font-size: 10px;
-      color: #535353;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    /* Поля ввода и Кнопки */
+    input[type="text"], select { 
+      width: 100%; 
+      padding: 10px; 
+      background: #080808; 
+      border: 1px solid #2c2c2c; 
+      color: #fff; 
+      border-radius: 4px; 
+      outline: none; 
+      font-size: 12px;
     }
+    .btn-submit { 
+      width: 100%; 
+      padding: 10px; 
+      background: #e0e0e0; 
+      color: #000; 
+      border: none; 
+      cursor: pointer; 
+      font-weight: bold; 
+      border-radius: 4px; 
+    }
+    .btn-submit:active { background: #bbb; }
+
+    /* 3. SECTION MUSIC DOWNLOAD */
+    .results-list { display: flex; flex-direction: column; gap: 6px; }
+    .track-item { display: flex; align-items: center; background: #161616; border: 1px solid #222; padding: 6px; border-radius: 4px; cursor: pointer; }
+    .track-item:hover { border-color: #444; background: #1c1c1c; }
+    .track-cover { width: 42px; height: 42px; border-radius: 3px; background: #222; margin-right: 10px; object-fit: cover; }
+    .track-info { display: flex; flex-direction: column; }
+    .track-title { font-size: 13px; font-weight: bold; color: #fff; }
+    .track-artist { font-size: 11px; color: #777; margin-top: 2px; }
   </style>
 </head>
 <body>
 
-  <!-- 1. MENU -->
-  <div class="card">
-    <div class="card-title">menu</div>
+  <div class="header">Kiwifyx / Control Panel</div>
+
+  <!-- 1. SECTION MENU -->
+  <div class="section-card">
+    <div class="section-title">menu</div>
     <div class="menu-grid">
-      <button class="white-box menu-btn" onclick="sendToBot('/photo cat')">
-        <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        Photo
-      </button>
-      <button class="white-box menu-btn" onclick="sendToBot('/music top')">
-        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-        Top Tracks
-      </button>
+      <div class="menu-card" onclick="scrollToSection('video-section')">VIDEO & MUSIC</div>
+      <!-- Пустая кнопка на будущее -->
+      <div class="menu-card empty">+ FUTURE</div>
     </div>
   </div>
 
-  <!-- 2. VIDEO DOWNLOAD -->
-  <div class="card">
-    <div class="card-title">video download</div>
-    <input type="text" id="videoUrl" class="white-box input-full" placeholder="Ссылка на видео...">
+  <!-- 2. SECTION VIDEO DOWNLOAD -->
+  <div id="video-section" class="section-card">
+    <div class="section-title">video download</div>
+    <input type="text" id="video-url" placeholder="Ссылка на YouTube...">
     
-    <div class="video-grid">
-      <div class="preview-box">
-        <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
-      </div>
-      <div class="video-actions">
-        <button class="white-box btn-action" onclick="sendVideo()">Скачать</button>
+    <div class="video-layout">
+      <div class="preview-placeholder">PREVIEW</div>
+      <div class="video-controls">
+        <select id="video-quality">
+          <option value="1080p">1080p Quality</option>
+          <option value="720p">720p Quality</option>
+          <option value="480p">480p Quality</option>
+          <option value="audio">Только звук (MP3)</option>
+        </select>
+        <button class="btn-submit" onclick="sendVideoRequest()">Скачать</button>
       </div>
     </div>
   </div>
 
-  <!-- 3. MUSIC DOWNLOAD -->
-  <div class="card">
-    <div class="card-title">music download</div>
-    <input type="text" id="musicQuery" class="white-box music-search" placeholder="Нажмите Enter для поиска..." onkeypress="handleMusicEnter(event)">
+  <!-- 3. SECTION MUSIC DOWNLOAD -->
+  <div class="section-card">
+    <div class="section-title">music download</div>
+    <input type="text" id="music-search" placeholder="Поиск песни или ссылка..." oninput="searchMusic(this.value)">
     
-    <!-- Пример карточки в стиле вашего скриншота -->
-    <div class="track-item">
-      <div class="track-cover"></div>
-      <div class="track-info">
-        <div class="track-title">Linear · 27-11-2022</div>
-        <div class="track-artist">Chinese Cigarettes</div>
-        <div class="track-tags">2020s, Cloud Rap, Digicore, Edm, Electropop</div>
+    <div class="results-list" id="music-results">
+      <div class="track-item" onclick="sendMusicRequest('Throw Away Your Mask - Lyn')">
+        <div class="track-cover" style="background-color:#2a2a2a;"></div>
+        <div class="track-info">
+          <div class="track-title">Throw Away Your Mask</div>
+          <div class="track-artist">Lyn</div>
+        </div>
+      </div>
+      <div class="track-item" onclick="sendMusicRequest('Linear - Chinese Cigarettes')">
+        <div class="track-cover" style="background-color:#2a2a2a;"></div>
+        <div class="track-info">
+          <div class="track-title">Linear</div>
+          <div class="track-artist">Chinese Cigarettes</div>
+        </div>
       </div>
     </div>
   </div>
@@ -234,26 +157,44 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    function sendToBot(text) {
-      if (text) {
-        tg.sendData(text);
-      }
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
     }
 
-    function sendVideo() {
-      const url = document.getElementById('videoUrl').value.trim();
-      if (url) {
-        sendToBot(`/video 1080p ${url}`);
-      }
+    function sendVideoRequest() {
+      const url = document.getElementById('video-url').value.trim();
+      const quality = document.getElementById('video-quality').value;
+      if (!url) return alert('Вставьте ссылку!');
+      
+      const mode = quality === 'audio' ? 'audio' : 'video';
+      tg.sendData(`${mode}|||${url}|||${quality}`);
+      tg.close();
     }
 
-    function handleMusicEnter(e) {
-      if (e.key === 'Enter') {
-        const query = document.getElementById('musicQuery').value.trim();
-        if (query) {
-          sendToBot(`/music ${query}`);
-        }
-      }
+    function sendMusicRequest(query) {
+      tg.sendData(`audio|||${query}|||best`);
+      tg.close();
+    }
+
+    function searchMusic(val) {
+      if (!val.trim()) return;
+      const container = document.getElementById('music-results');
+      container.innerHTML = `
+        <div class="track-item" onclick="sendMusicRequest('${val}')">
+          <div class="track-cover" style="background-color:#333;"></div>
+          <div class="track-info">
+            <div class="track-title">${val}</div>
+            <div class="track-artist">Искать и скачать оригинал</div>
+          </div>
+        </div>
+        <div class="track-item" onclick="sendMusicRequest('${val} slowed')">
+          <div class="track-cover" style="background-color:#333;"></div>
+          <div class="track-info">
+            <div class="track-title">${val} (Slowed)</div>
+            <div class="track-artist">Похожий вариант</div>
+          </div>
+        </div>
+      `;
     }
   </script>
 </body>
