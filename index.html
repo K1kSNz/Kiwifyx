@@ -35,11 +35,11 @@
         
         /* Сетка серых отдельных кнопок */
         .btn-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .btn-action { width: 100%; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; text-align: center; }
+        .btn-action { width: 100%; border: 1px solid var(--border-color); color: var(--text-main); padding: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; text-align: center; }
         
-        /* Серые кнопки выбора */
-        .btn-grey-quality { background: var(--btn-grey); }
-        .btn-grey-quality:hover { background: var(--btn-grey-hover); }
+        /* Отдельные серые кнопки */
+        .btn-grey-quality { background: var(--btn-grey); border: 1px solid #333; }
+        .btn-grey-quality:hover { background: var(--btn-grey-hover); border-color: #555; }
 
         .btn-music { background: var(--accent-green); border: none; color: white; }
         .btn-photo { background: var(--accent-blue); border: none; color: white; }
@@ -84,13 +84,13 @@
                 
                 <!-- Блок серых отдельных кнопок -->
                 <div id="video-actions" style="display: none;">
-                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 10px; margin-bottom: 2px;">Выберите качество:</div>
+                    <div style="font-size: 11px; color: var(--text-sub); margin-top: 10px; margin-bottom: 2px;">Выберите формат и качество:</div>
                     <div class="btn-list">
-                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('1080')">🎬 Скачать 1080p (Full HD)</button>
-                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('720')">🎬 Скачать 720p (HD)</button>
-                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('480')">🎬 Скачать 480p</button>
-                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('360')">🎬 Скачать 360p</button>
-                        <button class="btn-action btn-grey-quality" style="border-color: #444;" onclick="sendVideoQuery('audio')">🎵 Скачать Audio (MP3)</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('1080p')">🎬 Скачать 1080p (Full HD)</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('720p')">🎬 Скачать 720p (HD)</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('480p')">🎬 Скачать 480p</button>
+                        <button class="btn-action btn-grey-quality" onclick="sendVideoQuery('360p')">🎬 Скачать 360p</button>
+                        <button class="btn-action btn-grey-quality" style="border-color: #444;" onclick="sendVideoQuery('audio')">🎵 Скачать только Audio (MP3)</button>
                     </div>
                 </div>
             </div>
@@ -129,11 +129,11 @@
             activeType = null;
         }
 
-        // Функция отправки данных в Telegram бота
+        // Функция отправки данных Telegram боту
         function sendQuery(cmd, val) {
-            const dataToSend = `${cmd} ${val}`;
-            tg.sendData(dataToSend);
-            tg.close(); // Автоматически закрывает WebApp после клика
+            const fullMessage = `${cmd} ${val}`;
+            tg.sendData(fullMessage);
+            tg.close();
         }
 
         function handleMusicInput() {
