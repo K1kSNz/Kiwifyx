@@ -40,6 +40,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            padding-bottom: 30px;
         }
         .header {
             font-size: 18px;
@@ -49,6 +50,14 @@
             border-bottom: 1px solid var(--line);
             padding-bottom: 8px;
             font-family: 'IBM Plex Mono', monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header span {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: normal;
         }
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 5px; }
         .tab-btn {
@@ -99,14 +108,31 @@
         }
         .btn-submit:hover { background: #3a3a3a; }
 
+        /* Chips for search/likes */
+        .chips { display: flex; gap: 8px; margin-top: -2px; }
+        .chip {
+            flex: 1;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: background .16s, border-color .16s;
+        }
+        .chip:hover { background: #232323; border-color: #444; }
+        .chip.active { background: #2a2a2a; border-color: #555; font-weight: 700; }
+
         /* Results & Track styles */
         .results-list {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 480px;
+            max-height: 440px;
             overflow-y: auto;
-            margin-top: 5px;
+            margin-top: 2px;
         }
         .status-msg {
             padding: 30px 10px;
@@ -158,7 +184,7 @@
         
         .track-meta { flex: none; display: flex; align-items: center; gap: 6px; }
         .action-btn {
-            width: 32px; height: 32px;
+            width: 30px; height: 30px;
             border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             background: var(--surface-2);
@@ -171,12 +197,61 @@
         .action-btn:hover { color: var(--text); border-color: var(--accent); }
         .action-btn svg { width: 14px; height: 14px; }
         .download-btn:hover { color: #2ea44f; border-color: #2ea44f; background: #112218; }
+        .like-btn.liked { color: #ff6b81; border-color: #ff6b81; background: #2a1418; }
+
+        /* Mini equalizer animation for active track */
+        .mini-eq { display: flex; align-items: flex-end; gap: 2px; height: 14px; }
+        .mini-eq span { width: 2.5px; background: var(--accent); border-radius: 1px; animation: bounce .8s ease-in-out infinite; }
+        .mini-eq span:nth-child(2) { animation-delay: .15s; }
+        .mini-eq span:nth-child(3) { animation-delay: .3s; }
+        @keyframes bounce { 0%, 100% { height: 3px; } 50% { height: 12px; } }
+
+        /* Sticky Now Playing Bar */
+        .now-playing {
+            position: sticky; bottom: 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--accent-dim);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            display: flex; align-items: center; gap: 10px;
+            margin-top: 5px;
+        }
+        .now-playing .bar {
+            flex: 1; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; cursor: pointer;
+        }
+        .now-playing .bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width .1s linear; }
+        .now-playing button {
+            background: none; border: none; color: var(--text); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; flex: none;
+        }
+        .now-playing button svg { width: 18px; height: 18px; fill: var(--text); }
+        .np-info { flex: none; max-width: 110px; }
+        .np-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .np-artist { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .np-volume {
+            flex: none; display: flex; align-items: center; gap: 5px;
+        }
+        .np-volume svg { width: 14px; height: 14px; color: var(--muted); flex: none; }
+        .np-volume input[type="range"] {
+            -webkit-appearance: none; appearance: none;
+            width: 45px; height: 3px; border-radius: 2px;
+            background: var(--line); outline: none; cursor: pointer;
+        }
+        .np-volume input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--accent); cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header">Kiwifyx / Control Panel</div>
+        <div class="header">
+            Kiwifyx / Control Panel
+            <span id="counter-label">control panel</span>
+        </div>
 
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="openTab('video', this)">Video Download</button>
@@ -200,6 +275,12 @@
         <!-- MUSIC PANEL -->
         <div id="music" class="panel">
             <input type="text" id="music-search" placeholder="Ссылка или название песни..." oninput="handleSearchInput(this.value)">
+            
+            <div class="chips" id="chips">
+                <button class="chip active" data-mode="search">Поиск</button>
+                <button class="chip" data-mode="likes">Избранное</button>
+            </div>
+
             <div class="results-list" id="music-results">
                 <div class="status-msg">Введите название песни или ссылку</div>
             </div>
@@ -212,8 +293,16 @@
         tg.expand();
 
         let searchTimeout = null;
+        let seq = 0;
         let audio = null;
         let currentTrackId = null;
+        let nowPlayingEl = null;
+        let mode = 'search'; // 'search' | 'likes'
+
+        const musicSearchInput = document.getElementById('music-search');
+        const resultsContainer = document.getElementById('music-results');
+        const chipsEl = document.getElementById('chips');
+        const counterLabel = document.getElementById('counter-label');
 
         function openTab(tabName, element) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -221,99 +310,266 @@
             document.getElementById(tabName).classList.add('active');
             element.classList.add('active');
             if (audio) { audio.pause(); }
+            if (nowPlayingEl) { nowPlayingEl.remove(); nowPlayingEl = null; }
         }
 
+        /* Likes Storage Logic */
+        const LIKES_KEY = 'kiwifyx_likes_v1';
+        function getLikes() {
+            try { return JSON.parse(localStorage.getItem(LIKES_KEY) || '{}'); }
+            catch(e) { return {}; }
+        }
+        function setLikes(obj) {
+            try { localStorage.setItem(LIKES_KEY, JSON.stringify(obj)); } catch(e){}
+        }
+        function isLiked(id) { return !!getLikes()[id]; }
+        function toggleLike(track) {
+            const likes = getLikes();
+            if (likes[track.id]) delete likes[track.id];
+            else likes[track.id] = track;
+            setLikes(likes);
+        }
+
+        chipsEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('.chip');
+            if (!btn) return;
+            chipsEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            mode = btn.dataset.mode;
+
+            if (mode === 'likes') {
+                musicSearchInput.disabled = true;
+                musicSearchInput.placeholder = 'Сохранённые треки';
+                renderLikes();
+            } else {
+                musicSearchInput.disabled = false;
+                musicSearchInput.placeholder = 'Ссылка или название песни...';
+                if (musicSearchInput.value.trim()) handleSearchInput(musicSearchInput.value.trim());
+                else {
+                    resultsContainer.innerHTML = `<div class="status-msg">Введите название песни или ссылку</div>`;
+                    counterLabel.textContent = 'control panel';
+                }
+            }
+        });
+
         function handleSearchInput(value) {
+            if (mode !== 'search') return;
             clearTimeout(searchTimeout);
             const query = value.trim();
-            const container = document.getElementById('music-results');
 
             if (!query) {
-                container.innerHTML = `<div class="status-msg">Введите название песни или ссылку</div>`;
+                resultsContainer.innerHTML = `<div class="status-msg">Введите название песни или ссылку</div>`;
+                counterLabel.textContent = 'control panel';
                 return;
             }
 
             if (query.startsWith('http://') || query.startsWith('https://')) {
-                container.innerHTML = `
-                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="sendMusicRequest('${escapeQuotes(query)}')">
+                resultsContainer.innerHTML = `
+                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760; margin-top: 5px;" onclick="sendMusicRequest('${escapeQuotes(query)}')">
                         🎧 Скачать по ссылке через бота
                     </button>`;
+                counterLabel.textContent = 'link download';
                 return;
             }
 
-            container.innerHTML = `<div class="status-msg">Поиск...</div>`;
+            resultsContainer.innerHTML = `<div class="status-msg">Поиск...</div>`;
 
             searchTimeout = setTimeout(() => {
                 searchTracks(query);
             }, 300);
         }
 
+        function renderLikes() {
+            const likes = Object.values(getLikes());
+            counterLabel.textContent = likes.length ? likes.length + ' в избранном' : 'избранное';
+            if (likes.length === 0) {
+                resultsContainer.innerHTML = `<div class="status-msg">Пока пусто — нажмите на сердце у трека, чтобы сохранить</div>`;
+                return;
+            }
+            renderTracksList(likes);
+        }
+
         function searchTracks(query) {
-            const container = document.getElementById('music-results');
+            const mySeq = ++seq;
             const script = document.createElement('script');
             const callbackName = 'deezerCallback_' + Math.round(100000 * Math.random());
             
             window[callbackName] = function(data) {
                 delete window[callbackName];
                 document.body.removeChild(script);
+                if (mySeq !== seq) return;
 
                 if (!data.data || data.data.length === 0) {
-                    container.innerHTML = `<div class="status-msg">Ничего не найдено</div>`;
+                    resultsContainer.innerHTML = `<div class="status-msg">Ничего не найдено</div>`;
+                    counterLabel.textContent = '0 результатов';
                     return;
                 }
 
-                container.innerHTML = data.data.map(track => {
-                    const fullTitle = `${track.artist.name} - ${track.title}`;
-                    return `
-                        <div class="track-item" onclick="togglePreview(this, '${track.preview}', '${escapeQuotes(track.title)}', '${escapeQuotes(track.artist.name)}', ${track.id})">
-                            <div class="cover-wrap">
-                                <img src="${track.album.cover_medium}" alt="cover">
-                                ${track.preview ? `<div class="play-overlay"><svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg></div>` : ''}
-                            </div>
-                            <div class="track-info">
-                                <div class="track-title">${escapeHtml(track.title)}</div>
-                                <div class="track-artist">${escapeHtml(track.artist.name)}</div>
-                            </div>
-                            <div class="track-meta" onclick="event.stopPropagation()">
-                                <button class="action-btn download-btn" title="Скачать через бота" onclick="sendMusicRequest('${escapeQuotes(fullTitle)}')">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                </button>
-                                <a class="action-btn" href="${track.link}" target="_blank" title="Открыть в Deezer">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+                counterLabel.textContent = data.data.length + ' треков';
+                const formattedTracks = data.data.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    artist: item.artist?.name || '',
+                    cover: item.album?.cover_medium || '',
+                    albumTitle: item.album?.title || '',
+                    preview: item.preview,
+                    link: item.link
+                }));
+                renderTracksList(formattedTracks);
+            };
+
+            script.onerror = function() {
+                if (mySeq !== seq) return;
+                resultsContainer.innerHTML = `<div class="status-msg">Ошибка связи с Deezer</div>`;
             };
 
             script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=12&output=jsonp&callback=${callbackName}`;
             document.body.appendChild(script);
         }
 
+        function renderTracksList(items) {
+            resultsContainer.innerHTML = items.map(track => {
+                const fullTitle = `${track.artist} - ${track.title}`;
+                const liked = isLiked(track.id);
+                return `
+                    <div class="track-item" onclick="togglePreview(this, '${track.preview}', '${escapeQuotes(track.title)}', '${escapeQuotes(track.artist)}', ${track.id})">
+                        <div class="cover-wrap">
+                            <img src="${track.cover}" alt="cover" loading="lazy">
+                            ${track.preview ? `<div class="play-overlay"><svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg></div>` : ''}
+                        </div>
+                        <div class="track-info">
+                            <div class="track-title">${escapeHtml(track.title)}</div>
+                            <div class="track-artist">${escapeHtml(track.artist)}</div>
+                        </div>
+                        <div class="track-meta" onclick="event.stopPropagation()">
+                            <button class="action-btn like-btn ${liked ? 'liked' : ''}" title="В избранное" onclick="handleLikeClick(this, ${JSON.stringify(track).replace(/"/g, '&quot;')})">
+                                <svg viewBox="0 0 24 24" fill="${liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+                            </button>
+                            <button class="action-btn download-btn" title="Скачать через бота" onclick="sendMusicRequest('${escapeQuotes(fullTitle)}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </button>
+                            <a class="action-btn" href="${track.link}" target="_blank" title="Открыть в Deezer">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleLikeClick(btn, track) {
+            toggleLike(track);
+            btn.classList.toggle('liked');
+            const svg = btn.querySelector('svg');
+            svg.setAttribute('fill', btn.classList.contains('liked') ? 'currentColor' : 'none');
+            if (mode === 'likes' && !btn.classList.contains('liked')) {
+                btn.closest('.track-item').remove();
+                if (!Object.keys(getLikes()).length) renderLikes();
+            }
+        }
+
         function togglePreview(el, url, title, artist, id) {
             if (!url) return;
             
             if (currentTrackId === id && audio) {
-                if (audio.paused) { audio.play(); el.classList.add('playing'); } 
-                else { audio.pause(); el.classList.remove('playing'); }
+                if (audio.paused) { audio.play(); } else { audio.pause(); }
+                syncPlayingState();
                 return;
             }
 
-            if (audio) { 
-                audio.pause(); 
-                document.querySelectorAll('.track-item').forEach(t => t.classList.remove('playing'));
-            }
+            if (audio) { audio.pause(); }
+            document.querySelectorAll('.track-item').forEach(t => t.classList.remove('playing'));
 
             audio = new Audio(url);
+            audio.volume = getVolume();
             currentTrackId = id;
             el.classList.add('playing');
+            updateOverlay(el, true);
             audio.play();
 
+            showNowPlaying(title, artist);
+
+            audio.addEventListener('timeupdate', () => {
+                if (nowPlayingEl && audio.duration) {
+                    nowPlayingEl.querySelector('.bar-fill').style.width = (audio.currentTime / audio.duration * 100) + '%';
+                }
+            });
             audio.addEventListener('ended', () => {
                 el.classList.remove('playing');
+                updateOverlay(el, false);
+                if (nowPlayingEl) { nowPlayingEl.remove(); nowPlayingEl = null; }
                 currentTrackId = null;
             });
+        }
+
+        function syncPlayingState() {
+            const el = [...document.querySelectorAll('.track-item')].find(t => t.classList.contains('playing'));
+            if (!el) return;
+            updateOverlay(el, !audio.paused);
+            if (nowPlayingEl) {
+                nowPlayingEl.querySelector('.np-toggle').innerHTML = playIconSvg(!audio.paused);
+            }
+        }
+
+        function updateOverlay(el, playing) {
+            const overlay = el.querySelector('.play-overlay');
+            if (overlay) overlay.innerHTML = playing ? `<div class="mini-eq"><span></span><span></span><span></span></div>` : `<svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>`;
+        }
+
+        function playIconSvg(playing) {
+            return playing
+                ? `<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg>`
+                : `<svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>`;
+        }
+
+        const VOLUME_KEY = 'kiwifyx_volume_v1';
+        function getVolume() {
+            const v = parseFloat(localStorage.getItem(VOLUME_KEY));
+            return isNaN(v) ? 0.8 : Math.min(1, Math.max(0, v));
+        }
+        function setVolume(v) {
+            try { localStorage.setItem(VOLUME_KEY, String(v)); } catch(e){}
+        }
+
+        function showNowPlaying(title, artist) {
+            if (nowPlayingEl) nowPlayingEl.remove();
+            const vol = getVolume();
+
+            nowPlayingEl = document.createElement('div');
+            nowPlayingEl.className = 'now-playing';
+            nowPlayingEl.innerHTML = `
+                <button class="np-toggle">${playIconSvg(true)}</button>
+                <div class="np-info">
+                    <div class="np-title">${escapeHtml(title)}</div>
+                    <div class="np-artist">${escapeHtml(artist)}</div>
+                </div>
+                <div class="bar" onclick="seekAudio(event)"><div class="bar-fill"></div></div>
+                <div class="np-volume">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="4,9 8,9 12,5 12,19 8,15 4,15"></polygon><path d="M16 8a6 6 0 0 1 0 8"></path></svg>
+                    <input type="range" min="0" max="1" step="0.01" value="${vol}">
+                </div>
+            `;
+            nowPlayingEl.querySelector('.np-toggle').addEventListener('click', () => {
+                if (!audio) return;
+                if (audio.paused) audio.play(); else audio.pause();
+                syncPlayingState();
+            });
+            const volInput = nowPlayingEl.querySelector('.np-volume input');
+            volInput.addEventListener('input', () => {
+                const v = parseFloat(volInput.value);
+                if (audio) audio.volume = v;
+                setVolume(v);
+            });
+            document.querySelector('.container').appendChild(nowPlayingEl);
+        }
+
+        function seekAudio(e) {
+            if (!audio || !audio.duration) return;
+            const bar = e.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            audio.currentTime = (clickX / width) * audio.duration;
         }
 
         function sendVideoRequest() {
@@ -321,8 +577,8 @@
             const quality = document.getElementById('video-quality').value;
             if (!url) return alert('Введите ссылку!');
             
-            const mode = quality === 'audio' ? 'audio' : 'video';
-            tg.sendData(`${mode}|||${url}|||${quality}`);
+            const modeType = quality === 'audio' ? 'audio' : 'video';
+            tg.sendData(`${modeType}|||${url}|||${quality}`);
             tg.close();
         }
 
