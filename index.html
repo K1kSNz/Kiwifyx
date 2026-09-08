@@ -171,22 +171,6 @@
         .action-btn:hover { color: var(--text); border-color: var(--accent); }
         .action-btn svg { width: 14px; height: 14px; }
         .download-btn:hover { color: #2ea44f; border-color: #2ea44f; background: #112218; }
-
-        #result-video {
-            margin-top: 10px;
-            text-align: center;
-            word-break: break-all;
-        }
-        .download-link {
-            display: block;
-            margin-top: 10px;
-            padding: 12px;
-            background: #2ea44f;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -209,10 +193,8 @@
                     <option value="480p">480p Quality</option>
                     <option value="audio">Только звук (MP3)</option>
                 </select>
-                <button class="btn-submit" style="flex: 1;" onclick="sendVideoRequest()">Отправить</button>
+                <button class="btn-submit" style="flex: 1;" onclick="sendVideoRequest()">Скачать</button>
             </div>
-            <div id="result-video"></div>
-            <button class="btn-submit" style="background: #2ea44f; border-color: #2ea44f; margin-top: 5px;" onclick="getMediaCobalt()">Скачать напрямую (Cobalt)</button>
         </div>
 
         <!-- MUSIC PANEL -->
@@ -253,8 +235,8 @@
 
             if (query.startsWith('http://') || query.startsWith('https://')) {
                 container.innerHTML = `
-                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="getMediaCobaltLink('${escapeQuotes(query)}')">
-                        🎧 Скачать по ссылке (Cobalt)
+                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="sendMusicRequest('${escapeQuotes(query)}')">
+                        🎧 Скачать по ссылке через бота
                     </button>`;
                 return;
             }
@@ -283,7 +265,7 @@
                 container.innerHTML = data.data.map(track => {
                     const fullTitle = `${track.artist.name} - ${track.title}`;
                     return `
-                        <div class="track-item" id="track-${track.id}" onclick="togglePreview(this, '${track.preview}', '${escapeQuotes(track.title)}', '${escapeQuotes(track.artist.name)}', ${track.id})">
+                        <div class="track-item" onclick="togglePreview(this, '${track.preview}', '${escapeQuotes(track.title)}', '${escapeQuotes(track.artist.name)}', ${track.id})">
                             <div class="cover-wrap">
                                 <img src="${track.album.cover_medium}" alt="cover">
                                 ${track.preview ? `<div class="play-overlay"><svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg></div>` : ''}
@@ -293,7 +275,7 @@
                                 <div class="track-artist">${escapeHtml(track.artist.name)}</div>
                             </div>
                             <div class="track-meta" onclick="event.stopPropagation()">
-                                <button class="action-btn download-btn" title="Скачать трек" onclick="getMediaCobaltLink('https://deezer.com/track/${track.id}')">
+                                <button class="action-btn download-btn" title="Скачать через бота" onclick="sendMusicRequest('${escapeQuotes(fullTitle)}')">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                 </button>
                                 <a class="action-btn" href="${track.link}" target="_blank" title="Открыть в Deezer">
@@ -310,7 +292,7 @@
         }
 
         function togglePreview(el, url, title, artist, id) {
-            if (!url) return alert('Превью для этого трека недоступно');
+            if (!url) return;
             
             if (currentTrackId === id && audio) {
                 if (audio.paused) { audio.play(); el.classList.add('playing'); } 
@@ -334,53 +316,18 @@
             });
         }
 
-        async function getMediaCobalt() {
-            let url = document.getElementById('video-url').value.trim();
-            let resultDiv = document.getElementById('result-video');
-            if (!url) { resultDiv.innerHTML = "❌ Введи ссылку!"; return; }
-            resultDiv.innerHTML = "⏳ Обработка...";
-            
-            try {
-                let response = await fetch('https://api.cobalt.tools/api/json', {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url, vQuality: '720' })
-                });
-                let data = await response.json();
-                if (data.status === 'stream' || data.status === 'redirect') {
-                    resultDiv.innerHTML = `<a class="download-link" href="${data.url}" target="_blank">📥 Скачать файл</a>`;
-                } else {
-                    resultDiv.innerHTML = "❌ Не удалось получить ссылку.";
-                }
-            } catch (err) {
-                resultDiv.innerHTML = "❌ Ошибка соединения";
-            }
-        }
-
-        async function getMediaCobaltLink(url) {
-            try {
-                let response = await fetch('https://api.cobalt.tools/api/json', {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url })
-                });
-                let data = await response.json();
-                if (data.status === 'stream' || data.status === 'redirect') {
-                    window.open(data.url, '_blank');
-                } else {
-                    alert('Не удалось скачать через Cobalt');
-                }
-            } catch (err) {
-                alert('Ошибка соединения с Cobalt API');
-            }
-        }
-
         function sendVideoRequest() {
             const url = document.getElementById('video-url').value.trim();
             const quality = document.getElementById('video-quality').value;
             if (!url) return alert('Введите ссылку!');
+            
             const mode = quality === 'audio' ? 'audio' : 'video';
             tg.sendData(`${mode}|||${url}|||${quality}`);
+            tg.close();
+        }
+
+        function sendMusicRequest(query) {
+            tg.sendData(`audio|||${query}|||best`);
             tg.close();
         }
 
