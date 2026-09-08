@@ -243,6 +243,15 @@
             width: 10px; height: 10px; border-radius: 50%;
             background: var(--accent); cursor: pointer;
         }
+
+        /* Small limit note style */
+        .file-limit-note {
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            margin-top: -4px;
+        }
     </style>
 </head>
 <body>
@@ -270,6 +279,7 @@
                 </select>
                 <button class="btn-submit" style="flex: 1;" onclick="sendVideoRequest()">Скачать</button>
             </div>
+            <div class="file-limit-note">⚠️ Максимальный размер файла пока что: 50 МБ</div>
         </div>
 
         <!-- MUSIC PANEL -->
@@ -284,6 +294,7 @@
             <div class="results-list" id="music-results">
                 <div class="status-msg">Введите название песни или ссылку</div>
             </div>
+            <div class="file-limit-note">⚠️ Максимальный размер файла пока что: 50 МБ</div>
         </div>
     </div>
 
