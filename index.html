@@ -24,174 +24,175 @@
             --radius: 14px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; }
         body {
-            background: var(--bg);
+            background-color: var(--bg);
             color: var(--text);
             font-family: 'Space Grotesk', sans-serif;
-            padding: 20px 16px 40px;
-            min-height: 100%;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .wrap { max-width: 480px; margin: 0 auto; }
-
-        .brand {
-            display: flex; align-items: baseline; justify-content: space-between;
-            margin-bottom: 22px;
+        .container {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffffff;
             border-bottom: 1px solid var(--line);
             padding-bottom: 8px;
+            font-family: 'IBM Plex Mono', monospace;
         }
-        .brand h1 { font-size: 20px; font-weight: 700; color: #fff; }
-        .brand span { color: var(--muted); font-size: 12px; font-family: 'IBM Plex Mono', monospace; }
-
-        /* Navigation Tabs */
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 5px; }
         .tab-btn {
-            background: #1a1a1a; color: #fff; border: 1px solid #333;
-            padding: 10px 15px; cursor: pointer; border-radius: 10px;
-            flex: 1; text-align: center; font-size: 14px; font-weight: 500;
-            transition: background .2s, border-color .2s;
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            flex: 1;
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            transition: background .16s, border-color .16s;
         }
         .tab-btn:hover { background: #232323; border-color: #444; }
         .tab-btn.active { background: #2a2a2a; border-color: #555; font-weight: 700; }
+        
+        .panel { display: none; flex-direction: column; gap: 12px; }
+        .panel.active { display: flex; }
 
-        .panel { display: none; }
-        .panel.active { display: block; }
-
-        /* Inputs & Buttons */
         input[type="text"], select {
-            width: 100%; padding: 14px; background: #101014;
-            border: 1px solid #2c2c34; color: var(--cyan);
-            font-family: 'IBM Plex Mono', monospace; font-size: 14px;
-            border-radius: 10px; outline: none; margin-bottom: 12px;
+            width: 100%;
+            padding: 12px 14px;
+            background: #101014;
+            border: 1px solid #2c2c34;
+            color: var(--cyan);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            border-radius: 10px;
+            outline: none;
             transition: border-color .2s, background .2s;
         }
         input[type="text"]::placeholder { color: #55565f; }
-        input[type="text"]:focus, select:focus { border-color: #454550; background: #131317; }
-        
-        select { font-family: 'Space Grotesk', sans-serif; color: #fff; }
+        input[type="text"]:focus { border-color: #454550; background: #131317; }
 
         .btn-submit {
-            width: 100%; padding: 12px; background: #2b2b2b; color: #fff;
-            border: 1px solid #444; cursor: pointer; font-weight: bold;
-            border-radius: 10px; font-size: 14px; transition: background .2s;
+            width: 100%;
+            padding: 12px;
+            background: #2b2b2b;
+            color: #fff;
+            border: 1px solid #444;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: background .2s;
         }
         .btn-submit:hover { background: #3a3a3a; }
 
-        /* Chips */
-        .chips { display: flex; gap: 10px; margin-bottom: 18px; }
-        .chip {
-            flex: 1; padding: 10px 15px; border-radius: 10px;
-            border: 1px solid #333; background: #1a1a1a; color: #fff;
-            font-size: 13px; font-family: 'IBM Plex Mono', monospace;
-            cursor: pointer; text-align: center; white-space: nowrap;
-            transition: background .16s, border-color .16s;
+        /* Results & Track styles */
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 480px;
+            overflow-y: auto;
+            margin-top: 5px;
         }
-        .chip:hover { background: #232323; border-color: #444; }
-        .chip.active { background: #2a2a2a; border-color: #555; font-weight: bold; }
-
-        /* Results */
-        .results { display: flex; flex-direction: column; gap: 8px; min-height: 120px; }
-        
-        .status {
-            display: flex; flex-direction: column; align-items: center; gap: 14px;
-            padding: 40px 10px; color: #6f707a;
-            font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: center;
+        .status-msg {
+            padding: 30px 10px;
+            color: var(--muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            text-align: center;
         }
-        .status svg { width: 34px; height: 34px; stroke: #46445a; }
-
-        /* Equalizer loader */
-        .eq { display: flex; align-items: flex-end; gap: 4px; height: 26px; }
-        .eq span {
-            width: 4px; background: var(--accent); border-radius: 2px;
-            animation: bounce 0.9s ease-in-out infinite;
-        }
-        .eq span:nth-child(1) { animation-delay: 0s; }
-        .eq span:nth-child(2) { animation-delay: .15s; }
-        .eq span:nth-child(3) { animation-delay: .3s; }
-        .eq span:nth-child(4) { animation-delay: .45s; }
-        .eq span:nth-child(5) { animation-delay: .2s; }
-        @keyframes bounce {
-            0%, 100% { height: 6px; opacity: .55; }
-            50% { height: 24px; opacity: 1; }
-        }
-
-        .track {
-            display: flex; align-items: center; gap: 12px;
-            background: var(--surface); border: 1px solid var(--line);
-            border-radius: var(--radius); padding: 9px; cursor: pointer;
-            opacity: 0; transform: translateY(8px); animation: rise .35s ease forwards;
+        .track-item {
+            display: flex;
+            align-items: center;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 9px;
+            cursor: pointer;
             transition: border-color .2s, background .2s;
         }
-        .track:hover { border-color: #3a3a47; background: var(--surface-2); }
-        .track.playing { border-color: var(--accent); background: #201b12; }
-
-        @keyframes rise { to { opacity: 1; transform: none; } }
+        .track-item:hover { border-color: #3a3a47; background: var(--surface-2); }
+        .track-item.playing { border-color: var(--accent); background: #201b12; }
 
         .cover-wrap {
-            position: relative; flex: none; width: 52px; height: 52px;
-            border-radius: 9px; overflow: hidden; background: var(--surface-2);
+            position: relative;
+            flex: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface-2);
         }
         .cover-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .cover-wrap .play-overlay {
-            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,.45); opacity: 0; transition: opacity .15s;
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,.45);
+            opacity: 0;
+            transition: opacity .15s;
         }
-        .track:hover .play-overlay { opacity: 1; }
-        .track.playing .play-overlay { opacity: 1; background: rgba(0,0,0,.35); }
+        .track-item:hover .play-overlay { opacity: 1; }
+        .track-item.playing .play-overlay { opacity: 1; background: rgba(0,0,0,.35); }
         .play-overlay svg { width: 18px; height: 18px; fill: #fff; }
 
-        .track-info { flex: 1; min-width: 0; }
-        .track-title-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
-        .track-title {
-            font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .track-date { font-size: 12px; color: var(--muted); font-weight: 400; flex: none; }
-        .track-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .track-tags { font-size: 11.5px; color: var(--tag); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-info { flex: 1; min-width: 0; margin-left: 10px; }
+        .track-title { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .track-meta { flex: none; display: flex; align-items: center; gap: 10px; }
-        .duration { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
-        .open-link {
-            flex: none; width: 30px; height: 30px; border-radius: 8px;
+        .track-meta { flex: none; display: flex; align-items: center; gap: 6px; }
+        .action-btn {
+            width: 32px; height: 32px;
+            border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
-            background: var(--surface-2); border: 1px solid var(--line);
-            color: var(--muted); text-decoration: none; transition: all .15s;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            color: var(--muted);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .15s;
         }
-        .open-link:hover { color: var(--text); border-color: var(--accent); }
-        .open-link svg { width: 14px; height: 14px; }
+        .action-btn:hover { color: var(--text); border-color: var(--accent); }
+        .action-btn svg { width: 14px; height: 14px; }
+        .download-btn:hover { color: #2ea44f; border-color: #2ea44f; background: #112218; }
 
-        .mini-eq { display: flex; align-items: flex-end; gap: 2px; height: 14px; margin-right: 2px; }
-        .mini-eq span { width: 2.5px; background: var(--accent); border-radius: 1px; animation: bounce .8s ease-in-out infinite; }
-        .mini-eq span:nth-child(2) { animation-delay: .15s; }
-        .mini-eq span:nth-child(3) { animation-delay: .3s; }
-
-        .now-playing {
-            position: sticky; bottom: 12px; margin-top: 16px;
-            background: var(--surface-2); border: 1px solid var(--accent-dim);
-            border-radius: var(--radius); padding: 10px 12px;
-            display: flex; align-items: center; gap: 10px; animation: rise .3s ease;
+        #result-video {
+            margin-top: 10px;
+            text-align: center;
+            word-break: break-all;
         }
-        .now-playing .bar { flex: 1; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
-        .now-playing .bar-fill { height: 100%; width: 0%; background: var(--accent); transition: width .1s linear; }
-        .now-playing button { background: none; border: none; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex: none; }
-        .now-playing button svg { width: 20px; height: 20px; fill: var(--text); }
-        .now-playing .np-info { flex: none; max-width: 140px; }
-        .now-playing .np-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .now-playing .np-artist { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .footnote {
-            margin-top: 22px; text-align: center; font-size: 11px; color: #55536a;
-            font-family: 'IBM Plex Mono', monospace; line-height: 1.6;
+        .download-link {
+            display: block;
+            margin-top: 10px;
+            padding: 12px;
+            background: #2ea44f;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="wrap">
-        <div class="brand">
-            <h1>Kiwifyx / Control Panel</h1>
-            <span id="count-label">панель управления</span>
-        </div>
+    <div class="container">
+        <div class="header">Kiwifyx / Control Panel</div>
 
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="openTab('video', this)">Video Download</button>
@@ -200,7 +201,7 @@
 
         <!-- VIDEO PANEL -->
         <div id="video" class="panel active">
-            <input type="text" id="video-url" placeholder="Вставьте ссылку на видео (YouTube, TikTok и др.)...">
+            <input type="text" id="video-url" placeholder="Вставьте ссылку на видео (YouTube, TikTok)...">
             <div style="display: flex; gap: 10px;">
                 <select id="video-quality" style="flex: 2;">
                     <option value="1080p">1080p Quality</option>
@@ -208,31 +209,19 @@
                     <option value="480p">480p Quality</option>
                     <option value="audio">Только звук (MP3)</option>
                 </select>
-                <button class="btn-submit" style="flex: 1;" onclick="sendVideoRequest()">Скачать</button>
+                <button class="btn-submit" style="flex: 1;" onclick="sendVideoRequest()">Отправить</button>
             </div>
+            <div id="result-video"></div>
+            <button class="btn-submit" style="background: #2ea44f; border-color: #2ea44f; margin-top: 5px;" onclick="getMediaCobalt()">Скачать напрямую (Cobalt)</button>
         </div>
 
         <!-- MUSIC PANEL -->
         <div id="music" class="panel">
-            <div class="search-box">
-                <input type="text" id="query" placeholder="Исполнитель, трек или ссылка..." autocomplete="off">
-            </div>
-
-            <div class="chips" id="chips">
-                <button class="chip active" data-type="track">Треки</button>
-                <button class="chip" data-type="artist">Исполнители</button>
-                <button class="chip" data-type="album">Альбомы</button>
-            </div>
-
-            <div class="results" id="results">
-                <div class="status">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-                    Введите название песни или ссылку
-                </div>
+            <input type="text" id="music-search" placeholder="Ссылка или название песни..." oninput="handleSearchInput(this.value)">
+            <div class="results-list" id="music-results">
+                <div class="status-msg">Введите название песни или ссылку</div>
             </div>
         </div>
-
-        <div class="footnote">Kiwifyx WebApp · данные предоставлены Deezer</div>
     </div>
 
     <script>
@@ -240,291 +229,167 @@
         tg.ready();
         tg.expand();
 
-        // Tabs Logic
+        let searchTimeout = null;
+        let audio = null;
+        let currentTrackId = null;
+
         function openTab(tabName, element) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             element.classList.add('active');
+            if (audio) { audio.pause(); }
         }
 
-        // Video Request Handler
+        function handleSearchInput(value) {
+            clearTimeout(searchTimeout);
+            const query = value.trim();
+            const container = document.getElementById('music-results');
+
+            if (!query) {
+                container.innerHTML = `<div class="status-msg">Введите название песни или ссылку</div>`;
+                return;
+            }
+
+            if (query.startsWith('http://') || query.startsWith('https://')) {
+                container.innerHTML = `
+                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760;" onclick="getMediaCobaltLink('${escapeQuotes(query)}')">
+                        🎧 Скачать по ссылке (Cobalt)
+                    </button>`;
+                return;
+            }
+
+            container.innerHTML = `<div class="status-msg">Поиск...</div>`;
+
+            searchTimeout = setTimeout(() => {
+                searchTracks(query);
+            }, 300);
+        }
+
+        function searchTracks(query) {
+            const container = document.getElementById('music-results');
+            const script = document.createElement('script');
+            const callbackName = 'deezerCallback_' + Math.round(100000 * Math.random());
+            
+            window[callbackName] = function(data) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+
+                if (!data.data || data.data.length === 0) {
+                    container.innerHTML = `<div class="status-msg">Ничего не найдено</div>`;
+                    return;
+                }
+
+                container.innerHTML = data.data.map(track => {
+                    const fullTitle = `${track.artist.name} - ${track.title}`;
+                    return `
+                        <div class="track-item" id="track-${track.id}" onclick="togglePreview(this, '${track.preview}', '${escapeQuotes(track.title)}', '${escapeQuotes(track.artist.name)}', ${track.id})">
+                            <div class="cover-wrap">
+                                <img src="${track.album.cover_medium}" alt="cover">
+                                ${track.preview ? `<div class="play-overlay"><svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg></div>` : ''}
+                            </div>
+                            <div class="track-info">
+                                <div class="track-title">${escapeHtml(track.title)}</div>
+                                <div class="track-artist">${escapeHtml(track.artist.name)}</div>
+                            </div>
+                            <div class="track-meta" onclick="event.stopPropagation()">
+                                <button class="action-btn download-btn" title="Скачать трек" onclick="getMediaCobaltLink('https://deezer.com/track/${track.id}')">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                </button>
+                                <a class="action-btn" href="${track.link}" target="_blank" title="Открыть в Deezer">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            };
+
+            script.src = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=12&output=jsonp&callback=${callbackName}`;
+            document.body.appendChild(script);
+        }
+
+        function togglePreview(el, url, title, artist, id) {
+            if (!url) return alert('Превью для этого трека недоступно');
+            
+            if (currentTrackId === id && audio) {
+                if (audio.paused) { audio.play(); el.classList.add('playing'); } 
+                else { audio.pause(); el.classList.remove('playing'); }
+                return;
+            }
+
+            if (audio) { 
+                audio.pause(); 
+                document.querySelectorAll('.track-item').forEach(t => t.classList.remove('playing'));
+            }
+
+            audio = new Audio(url);
+            currentTrackId = id;
+            el.classList.add('playing');
+            audio.play();
+
+            audio.addEventListener('ended', () => {
+                el.classList.remove('playing');
+                currentTrackId = null;
+            });
+        }
+
+        async function getMediaCobalt() {
+            let url = document.getElementById('video-url').value.trim();
+            let resultDiv = document.getElementById('result-video');
+            if (!url) { resultDiv.innerHTML = "❌ Введи ссылку!"; return; }
+            resultDiv.innerHTML = "⏳ Обработка...";
+            
+            try {
+                let response = await fetch('https://api.cobalt.tools/api/json', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, vQuality: '720' })
+                });
+                let data = await response.json();
+                if (data.status === 'stream' || data.status === 'redirect') {
+                    resultDiv.innerHTML = `<a class="download-link" href="${data.url}" target="_blank">📥 Скачать файл</a>`;
+                } else {
+                    resultDiv.innerHTML = "❌ Не удалось получить ссылку.";
+                }
+            } catch (err) {
+                resultDiv.innerHTML = "❌ Ошибка соединения";
+            }
+        }
+
+        async function getMediaCobaltLink(url) {
+            try {
+                let response = await fetch('https://api.cobalt.tools/api/json', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+                let data = await response.json();
+                if (data.status === 'stream' || data.status === 'redirect') {
+                    window.open(data.url, '_blank');
+                } else {
+                    alert('Не удалось скачать через Cobalt');
+                }
+            } catch (err) {
+                alert('Ошибка соединения с Cobalt API');
+            }
+        }
+
         function sendVideoRequest() {
             const url = document.getElementById('video-url').value.trim();
             const quality = document.getElementById('video-quality').value;
             if (!url) return alert('Введите ссылку!');
-            
             const mode = quality === 'audio' ? 'audio' : 'video';
             tg.sendData(`${mode}|||${url}|||${quality}`);
             tg.close();
         }
 
-        // Music Search & Deezer Integration
-        const input = document.getElementById('query');
-        const resultsEl = document.getElementById('results');
-        const chipsEl = document.getElementById('chips');
-        const countLabel = document.getElementById('count-label');
-
-        let activeType = 'track';
-        let searchTimeout = null;
-        let seq = 0;
-        let audio = null;
-        let currentTrackId = null;
-        let nowPlayingEl = null;
-
-        chipsEl.addEventListener('click', (e) => {
-            const btn = e.target.closest('.chip');
-            if (!btn) return;
-            chipsEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            activeType = btn.dataset.type;
-            if (input.value.trim()) handleSearchInput(input.value.trim());
-        });
-
-        input.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            const q = input.value.trim();
-            
-            if (!q) {
-                renderEmpty();
-                return;
-            }
-
-            // Check if input is a direct link
-            if (q.startsWith('http://') || q.startsWith('https://')) {
-                resultsEl.innerHTML = `
-                    <button class="btn-submit" style="background: #1db954; border-color: #1ed760; margin-top: 10px;" onclick="sendMusicRequest('${escapeQuotes(q)}')">
-                        🎧 Отправить ссылку в бот
-                    </button>`;
-                countLabel.textContent = 'ссылка';
-                return;
-            }
-
-            showLoading();
-            searchTimeout = setTimeout(() => runSearch(q), 320);
-        });
-
-        function showLoading() {
-            resultsEl.innerHTML = `
-                <div class="status">
-                    <div class="eq"><span></span><span></span><span></span><span></span><span></span></div>
-                    Ищу…
-                </div>`;
-        }
-
-        function renderEmpty() {
-            countLabel.textContent = 'панель управления';
-            resultsEl.innerHTML = `
-                <div class="status">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    Введите название песни или ссылку
-                </div>`;
-        }
-
-        function renderNoResults() {
-            resultsEl.innerHTML = `
-                <div class="status">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M12 3v18"></path></svg>
-                    Ничего не найдено
-                </div>`;
-        }
-
-        function runSearch(query) {
-            const mySeq = ++seq;
-            const endpoint = activeType === 'track' ? 'search' :
-                             activeType === 'album' ? 'search/album' : 'search/artist';
-            const callbackName = 'sonoraCb_' + Math.round(Math.random() * 1e6);
-            const script = document.createElement('script');
-
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                if (mySeq !== seq) return;
-
-                const items = data && data.data ? data.data : [];
-                if (items.length === 0) { renderNoResults(); countLabel.textContent = '0 результатов'; return; }
-                countLabel.textContent = items.length + ' результат';
-                renderResults(items);
-            };
-
-            script.onerror = function() {
-                if (mySeq !== seq) return;
-                resultsEl.innerHTML = `<div class="status">Ошибка загрузки. Проверьте соединение.</div>`;
-            };
-
-            script.src = `https://api.deezer.com/${endpoint}?q=${encodeURIComponent(query)}&limit=15&output=jsonp&callback=${callbackName}`;
-            document.body.appendChild(script);
-        }
-
-        function formatDuration(sec) {
-            if (!sec && sec !== 0) return '';
-            const m = Math.floor(sec / 60), s = String(sec % 60).padStart(2,'0');
-            return `${m}:${s}`;
-        }
-
-        function formatFans(n) {
-            if (n >= 1e6) return (n/1e6).toFixed(1).replace('.0','') + 'M';
-            if (n >= 1e3) return (n/1e3).toFixed(1).replace('.0','') + 'K';
-            return String(n);
-        }
-
-        function renderResults(items) {
-            resultsEl.innerHTML = '';
-            items.forEach((item, i) => {
-                const el = document.createElement('div');
-                el.className = 'track';
-                el.style.animationDelay = (i * 0.035) + 's';
-
-                let cover, title, sub, tags, duration, previewUrl, link, id;
-
-                if (activeType === 'track') {
-                    cover = item.album?.cover_medium || '';
-                    title = item.title;
-                    sub = item.artist?.name || '';
-                    tags = item.album?.title || '';
-                    duration = formatDuration(item.duration);
-                    previewUrl = item.preview;
-                    link = item.link;
-                    id = item.id;
-                } else if (activeType === 'album') {
-                    cover = item.cover_medium || '';
-                    title = item.title;
-                    sub = item.artist?.name || '';
-                    tags = item.record_type || 'Альбом';
-                    duration = '';
-                    previewUrl = null;
-                    link = item.link;
-                    id = item.id;
-                } else {
-                    cover = item.picture_medium || '';
-                    title = item.name;
-                    sub = 'Исполнитель';
-                    tags = item.nb_fan ? formatFans(item.nb_fan) + ' слушателей' : '';
-                    duration = '';
-                    previewUrl = null;
-                    link = item.link;
-                    id = item.id;
-                }
-
-                const fullTitle = `${sub} - ${title}`;
-
-                el.innerHTML = `
-                    <div class="cover-wrap">
-                        <img src="${cover}" alt="" loading="lazy">
-                        ${previewUrl ? `<div class="play-overlay">${playIconSvg(false)}</div>` : ''}
-                    </div>
-                    <div class="track-info">
-                        <div class="track-title-row">
-                            <span class="track-title">${escapeHtml(title)}</span>
-                        </div>
-                        <div class="track-sub">${escapeHtml(sub)}</div>
-                        ${tags ? `<div class="track-tags">${escapeHtml(tags)}</div>` : ''}
-                    </div>
-                    <div class="track-meta">
-                        ${duration ? `<span class="duration">${duration}</span>` : ''}
-                        <a class="open-link" href="${link}" target="_blank" rel="noopener" title="Deezer" onclick="event.stopPropagation()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        </a>
-                    </div>
-                `;
-
-                if (previewUrl && activeType === 'track') {
-                    el.addEventListener('click', () => togglePreview(el, previewUrl, title, sub, id));
-                } else {
-                    el.addEventListener('click', () => sendMusicRequest(fullTitle));
-                }
-
-                resultsEl.appendChild(el);
-            });
-        }
-
-        function playIconSvg(playing) {
-            return playing
-                ? `<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg>`
-                : `<svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"></polygon></svg>`;
-        }
-
-        function togglePreview(el, url, title, artist, id) {
-            if (currentTrackId === id && audio) {
-                if (audio.paused) { audio.play(); } else { audio.pause(); }
-                syncPlayingState();
-                return;
-            }
-
-            if (audio) { audio.pause(); }
-            document.querySelectorAll('.track.playing').forEach(t => t.classList.remove('playing'));
-
-            audio = new Audio(url);
-            currentTrackId = id;
-            el.classList.add('playing');
-            updateOverlay(el, true);
-            audio.play();
-
-            showNowPlaying(title, artist);
-
-            audio.addEventListener('timeupdate', () => {
-                if (nowPlayingEl && audio.duration) {
-                    nowPlayingEl.querySelector('.bar-fill').style.width = (audio.currentTime / audio.duration * 100) + '%';
-                }
-            });
-            audio.addEventListener('ended', () => {
-                el.classList.remove('playing');
-                updateOverlay(el, false);
-                if (nowPlayingEl) nowPlayingEl.remove();
-                currentTrackId = null;
-            });
-        }
-
-        function syncPlayingState() {
-            const el = [...document.querySelectorAll('.track')].find(t => t.classList.contains('playing'));
-            if (!el) return;
-            updateOverlay(el, !audio.paused);
-            if (nowPlayingEl) {
-                const btn = nowPlayingEl.querySelector('.np-toggle');
-                btn.innerHTML = playIconSvg(!audio.paused);
-            }
-        }
-
-        function updateOverlay(el, playing) {
-            const overlay = el.querySelector('.play-overlay');
-            if (overlay) overlay.innerHTML = playing ? miniEqSvg() : playIconSvg(false);
-        }
-
-        function miniEqSvg() {
-            return `<div class="mini-eq"><span></span><span></span><span></span></div>`;
-        }
-
-        function showNowPlaying(title, artist) {
-            if (nowPlayingEl) nowPlayingEl.remove();
-            nowPlayingEl = document.createElement('div');
-            nowPlayingEl.className = 'now-playing';
-            nowPlayingEl.innerHTML = `
-                <button class="np-toggle">${playIconSvg(true)}</button>
-                <div class="np-info">
-                    <div class="np-title">${escapeHtml(title)}</div>
-                    <div class="np-artist">${escapeHtml(artist)}</div>
-                </div>
-                <div class="bar"><div class="bar-fill"></div></div>
-            `;
-            nowPlayingEl.querySelector('.np-toggle').addEventListener('click', () => {
-                if (!audio) return;
-                if (audio.paused) audio.play(); else audio.pause();
-                syncPlayingState();
-            });
-            document.querySelector('.wrap').appendChild(nowPlayingEl);
-        }
-
-        function sendMusicRequest(query) {
-            tg.sendData(`audio|||${query}|||best`);
-            tg.close();
-        }
-
         function escapeHtml(str) {
-            return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
         function escapeQuotes(str) {
-            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            return String(str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
     </script>
 </body>
